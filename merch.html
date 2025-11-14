@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Merch — Huanger Films</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">Huanger Films</h1>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="videos.html">Videos</a>
+        <a href="photos.html">Photos</a>
+        <a href="merch.html">Merch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Merch Shop</h2>
+    <p>Buy Huanger Films merch. Prices are configurable per item in <code>script.js</code>.</p>
+
+    <section id="merch-grid" class="product-grid"></section>
+
+    <section class="notes">
+      <h4>Payment methods</h4>
+      <ul>
+        <li><strong>PayPal (live)</strong>: Uses your PayPal email and posts to PayPal checkout (no server needed).</li>
+        <li><strong>Stripe (live)</strong>: Uses Stripe Payment Links. Create payment links in your Stripe Dashboard and paste the link into the product objects in <code>script.js</code>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year-merch"></span> Huanger Films</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
