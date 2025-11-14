@@ -1,453 +1,181 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Huanger Films — Calendar & Booking</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Huanger Films – Calendar</title>
   <style>
-    /* -------- layout & theme (prettier) -------- */
-    :root{
-      --accent:#0ea5e9;
-      --bg:#f7fbfc;
-      --card:#ffffff;
-      --muted:#6b7280;
-      --danger:#ef4444;
-      --success:#16a34a;
-      --glass: rgba(255,255,255,0.6);
-    }
-    *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);margin:0;padding:0;color:#0f172a}
-    header{background:linear-gradient(90deg,var(--accent),#7dd3fc);padding:18px;color:#fff}
-    header .container{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
-    h1{margin:0;font-size:20px}
-    main.container{max-width:1100px;margin:20px auto;padding:18px}
-    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-    .ghost{background:transparent;border:1px solid rgba(15,23,42,0.08);color:var(--muted)}
-    .panel{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.06)}
-    .flex{display:flex;gap:12px;align-items:center}
-    .auth{margin-left:auto}
-    /* calendar layout */
-    .views{display:flex;gap:12px}
-    .monthView, .weekView{flex:1}
-    .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .day-card{background:var(--card);border-radius:8px;padding:8px;min-height:84px;border:1px solid rgba(2,6,23,0.06)}
-    .day-num{font-weight:600;margin-bottom:8px}
-    .small-muted{font-size:12px;color:var(--muted)}
-    .slot{display:inline-block;padding:6px 8px;border-radius:6px;margin:4px 4px 0 0;font-size:13px;cursor:pointer}
-    .slot.available{background:#ecfdf5;border:1px solid #bbf7d0;color:var(--success)}
-    .slot.booked{background:#fff1f2;border:1px solid #fecaca;color:var(--danger)}
-    /* week grid */
-    .week-grid{overflow:auto;border-radius:10px;border:1px solid rgba(2,6,23,0.06)}
-    .week-header{display:grid;grid-template-columns:120px repeat(7,1fr);background:#fff;padding:8px;border-bottom:1px solid rgba(2,6,23,0.04)}
-    .week-body{display:grid;grid-template-columns:120px repeat(7,1fr)}
-    .time-cell{padding:6px;border-bottom:1px solid rgba(2,6,23,0.03);border-right:1px solid rgba(2,6,23,0.02);min-height:48px}
-    .day-col{padding:6px;border-bottom:1px solid rgba(2,6,23,0.03);min-height:48px}
-    .hour-box{border-radius:6px;padding:8px;text-align:center;cursor:pointer}
-    .hour-available{background:#ecfeff;border:1px solid #bbf7d0;color:#065f46}
-    .hour-booked{background:#fff1f2;border:1px solid #fecaca;color:#7f1d1d}
-    /* modal */
-    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.4)}
-    .modal .modal-content{width:420px;background:#fff;padding:18px;border-radius:10px}
-    input[type="text"], input[type="email"], input[type="number"]{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #e6eef6}
-    footer{padding:18px;text-align:center;color:var(--muted);font-size:14px}
-    @media(max-width:900px){
-      .week-header, .week-body{grid-template-columns:80px repeat(7,1fr)}
-      .week-header div, .week-body div{font-size:12px}
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background:#111; color:#fff; padding:15px; text-align:center; font-size:24px; }
+    .view-switch { display:flex; justify-content:center; gap:12px; margin:15px; }
+    button { padding:10px 16px; cursor:pointer; }
+    /* MONTH VIEW */
+    #monthView { display:none; padding:20px; }
+    .month-header { display:flex; justify-content:space-between; align-items:center; font-size:20px; margin-bottom:15px; }
+    .month-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+    .day-cell { border:1px solid #ccc; padding:10px; min-height:80px; position:relative; cursor:pointer; }
+    .day-num { font-weight:bold; }
+    .booked { background:#ffb3b3; }
+
+    /* WEEK VIEW */
+    #weekView { padding:20px; }
+    .week-header { display:flex; justify-content:space-between; align-items:center; font-size:20px; margin-bottom:15px; }
+    .week-grid { display:grid; grid-template-columns:repeat(8,1fr); border:1px solid #000; }
+    .week-grid div { border:1px solid #ccc; padding:6px; font-size:12px; }
+    .hour-box { cursor:pointer; min-height:38px; }
+    .hour-box.available { background:#d2ffd2; }
+    .hour-box.booked { background:#ff7a7a; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1>Huanger Films — Bookings</h1>
-      <div class="auth" id="auth-area">
-        <!-- auth UI injected here -->
-      </div>
-    </div>
-  </header>
+<header>
+  Huanger Films – Booking Calendar
+  <nav style="margin-top:10px; display:flex; justify-content:center; gap:15px; font-size:16px;">
+    <a href="index.html" style="color:white;">Home</a>
+    <a href="videos.html" style="color:white;">Videos</a>
+    <a href="photos.html" style="color:white;">Photos</a>
+    <a href="merch.html" style="color:white;">Merch</a>
+    <a href="calendar.html" style="color:white; font-weight:bold;">Calendar</a>
+  </nav>
+</header>
 
-  <main class="container">
-    <div class="controls">
-      <div class="flex">
-        <button class="btn" id="monthBtn">Month</button>
-        <button class="btn ghost" id="weekBtn">Week</button>
-        <div style="display:flex;align-items:center;gap:8px;margin-left:12px">
-          <button class="ghost" id="prev">Prev</button>
-          <div id="label" class="small-muted"></div>
-          <button class="ghost" id="next">Next</button>
-        </div>
-      </div>
+<div class="view-switch">
+  <button onclick="showMonth()">Month View</button>
+  <button onclick="showWeek()">Week View</button>
+</div>
 
-      <div style="margin-left:auto" class="small-muted">Signed in as <span id="userEmail">—</span></div>
-    </div>
-
-    <div class="views">
-      <!-- Month View -->
-      <div class="monthView panel" id="monthView" style="display:none">
-        <div class="month-grid" id="monthGrid"></div>
-      </div>
-
-      <!-- Week View -->
-      <div class="weekView panel" id="weekView">
-        <div class="week-grid" id="weekGrid">
-          <div class="week-header" id="weekHeader"></div>
-          <div class="week-body" id="weekBody"></div>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Booking modal -->
-  <div id="bookingModal" class="modal" style="display:none">
-    <div class="modal-content">
-      <h3 id="modalTitle">Book Hour</h3>
-      <div id="modalInfo" class="small-muted"></div>
-      <label>Price (USD)</label>
-      <input id="modalPrice" type="number" value="50" min="1">
-      <label>Your display name</label>
-      <input id="modalName" type="text" placeholder="Full name">
-      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
-        <button id="closeModal" class="ghost">Cancel</button>
-        <button id="payStripe" class="btn">Pay with Stripe</button>
-        <button id="payPayPal" class="btn" style="background:#253858">Pay with PayPal</button>
-      </div>
-    </div>
+<!-- MONTH VIEW -->
+<div id="monthView">
+  <div class="month-header">
+    <button onclick="changeMonth(-1)">◀</button>
+    <div id="monthLabel"></div>
+    <button onclick="changeMonth(1)">▶</button>
   </div>
+  <div class="month-grid" id="monthGrid"></div>
+</div>
 
-  <footer>
-    &copy; <span id="year"></span> Huanger Films — bookings & payments
-  </footer>
+<!-- WEEK VIEW -->
+<div id="weekView">
+  <div class="week-header">
+    <button onclick="changeWeek(-1)">◀</button>
+    <div id="weekLabel"></div>
+    <button onclick="changeWeek(1)">▶</button>
+  </div>
+  <div class="week-grid" id="weekGrid"></div>
+</div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ==========================
+//   GLOBAL DATA STORAGE
+// ==========================
+let bookings = JSON.parse(localStorage.getItem("hfBookings") || "{}");
+function saveBookings() { localStorage.setItem("hfBookings", JSON.stringify(bookings)); }
 
-  <script>
-  /****************************************************************
-   *  CONFIGURATION - REPLACE THESE WITH YOUR REAL VALUES
-   ****************************************************************/
-  const FIREBASE_CONFIG = {
-    apiKey: "REPLACE_FIREBASE_API_KEY",
-    authDomain: "REPLACE_FIREBASE_AUTHDOMAIN",
-    projectId: "REPLACE_FIREBASE_PROJECTID",
-    storageBucket: "REPLACE_FIREBASE_STORAGEBUCKET",
-    messagingSenderId: "REPLACE_FIREBASE_MSG_ID",
-    appId: "REPLACE_FIREBASE_APPID"
-  };
+// ==========================
+//   VIEW SWITCHING
+// ==========================
+function showMonth(){ document.getElementById("monthView").style.display="block"; document.getElementById("weekView").style.display="none"; renderMonth(); }
+function showWeek(){ document.getElementById("monthView").style.display="none"; document.getElementById("weekView").style.display="block"; renderWeek(); }
 
-  // Your public stripe key (publishable) - used only for redirect in client
-  const STRIPE_PUBLISHABLE_KEY = "pk_live_REPLACE_ME";
+// ==========================
+//   MONTH VIEW
+// ==========================
+let currentMonth=new Date();
 
-  // Server base url where server.js is hosted (HTTPS). Example: https://api.huangerfilms.com
-  const API_BASE_URL = "https://REPLACE_WITH_YOUR_SERVER_URL";
+function changeMonth(dir){ currentMonth.setMonth(currentMonth.getMonth()+dir); renderMonth(); }
 
-  // App settings
-  const START_HOUR = 7;  // 7am
-  const END_HOUR = 20;   // 8pm (exclusive)
-  /****************************************************************/
-  </script>
+function renderMonth(){
+  const year=currentMonth.getFullYear();
+  const month=currentMonth.getMonth();
+  const first=new Date(year,month,1);
+  const days=new Date(year,month+1,0).getDate();
 
-  <script>
-  // ---- Initialize Firebase (compat) ----
-  firebase.initializeApp(FIREBASE_CONFIG);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+  document.getElementById("monthLabel").textContent=
+    currentMonth.toLocaleString("default",{month:"long"})+" "+year;
 
-  // UI refs
-  const monthBtn = document.getElementById('monthBtn');
-  const weekBtn = document.getElementById('weekBtn');
-  const monthView = document.getElementById('monthView');
-  const weekView = document.getElementById('weekView');
-  const label = document.getElementById('label');
-  const prevBtn = document.getElementById('prev');
-  const nextBtn = document.getElementById('next');
-  const monthGrid = document.getElementById('monthGrid');
-  const weekHeader = document.getElementById('weekHeader');
-  const weekBody = document.getElementById('weekBody');
-  const bookingModal = document.getElementById('bookingModal');
-  const modalInfo = document.getElementById('modalInfo');
-  const modalPrice = document.getElementById('modalPrice');
-  const modalName = document.getElementById('modalName');
-  const closeModal = document.getElementById('closeModal');
-  const payStripe = document.getElementById('payStripe');
-  const payPayPal = document.getElementById('payPayPal');
-  const userEmailEl = document.getElementById('userEmail');
+  const grid=document.getElementById("monthGrid");
+  grid.innerHTML="";
 
-  let view = 'week'; // 'week' or 'month'
-  let cursorDate = new Date(); // tracks current month/week shown
-  let selectedSlot = null; // {date: 'YYYY-MM-DD', hour: 9}
+  for(let i=0;i<first.getDay();i++){ grid.innerHTML+=`<div></div>`; }
 
-  // show year
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  // ---- Auth UI (simple email + signout) ----
-  const authArea = document.getElementById('auth-area');
-  function renderAuthUI(user){
-    authArea.innerHTML = '';
-    if(user){
-      userEmailEl.textContent = user.email || user.displayName || 'user';
-      const btn = document.createElement('button');
-      btn.textContent = 'Sign out';
-      btn.className = 'ghost';
-      btn.onclick = ()=> auth.signOut();
-      authArea.appendChild(btn);
-    } else {
-      // quick sign-in / sign-up form
-      const emailIn = document.createElement('input');
-      emailIn.placeholder = 'email';
-      emailIn.type = 'email';
-      emailIn.style.marginRight='6px';
-      const passIn = document.createElement('input');
-      passIn.placeholder = 'password';
-      passIn.type = 'password';
-      passIn.style.marginRight='6px';
-      const signInBtn = document.createElement('button');
-      signInBtn.textContent = 'Sign in';
-      signInBtn.className='btn';
-      signInBtn.onclick = async ()=>{
-        try {
-          await auth.signInWithEmailAndPassword(emailIn.value, passIn.value);
-        } catch(e){
-          alert('Sign in failed: '+e.message);
-        }
-      };
-      const signUpBtn = document.createElement('button');
-      signUpBtn.textContent = 'Sign up';
-      signUpBtn.className='ghost';
-      signUpBtn.onclick = async ()=>{
-        try {
-          const res = await auth.createUserWithEmailAndPassword(emailIn.value, passIn.value);
-          await res.user.sendEmailVerification();
-          alert('Verification email sent. Please verify before booking.');
-        } catch(e){
-          alert('Sign up failed: '+e.message);
-        }
-      };
-      authArea.appendChild(emailIn);
-      authArea.appendChild(passIn);
-      authArea.appendChild(signInBtn);
-      authArea.appendChild(signUpBtn);
-    }
+  for(let d=1; d<=days; d++){
+    const key=`${year}-${month+1}-${d}`;
+    const bookedDay = bookings[key] && Object.values(bookings[key]).includes(true);
+    grid.innerHTML += `
+      <div class="day-cell ${bookedDay?"booked":""}" onclick="openDay('${key}')">
+        <div class="day-num">${d}</div>
+      </div>`;
   }
-  auth.onAuthStateChanged(user=>{
-    if(user && !user.emailVerified){
-      // enforce email verification for bookings
-      userEmailEl.textContent = `${user.email} (unverified)`;
-    }
-    renderAuthUI(user);
-  });
+}
 
-  // -------- Helper formatting --------
-  function ymd(d){
-    const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
+function openDay(key){ alert("Switch to week view to book by the hour."); }
+
+// ==========================
+//   WEEK VIEW
+// ==========================
+let currentWeek=new Date();
+
+function changeWeek(dir){ currentWeek.setDate(currentWeek.getDate()+dir*7); renderWeek(); }
+
+function getWeekDates(date){
+  const start=new Date(date);
+  start.setDate(start.getDate()-start.getDay());
+  const days=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(start);
+    d.setDate(start.getDate()+i);
+    days.push(d);
   }
-  function hourLabel(h){ return `${String(h).padStart(2,'0')}:00`; }
+  return days;
+}
 
-  // -------- Firestore bookings collection usage --------
-  // Structure: collection 'bookings' documents: docId = 'YYYY-MM-DD'
-  // doc data: { '09': { booked:true, uid:..., name:..., paid:true, paymentProvider:'stripe', price:50 }, '15': {...} }
-  const bookingsCol = db.collection('bookings');
+function renderWeek(){
+  const days=getWeekDates(currentWeek);
+  const labelDays=days[0].toLocaleDateString()+" – "+days[6].toLocaleDateString();
+  document.getElementById("weekLabel").textContent=labelDays;
 
-  // Realtime listener for bookings in the visible month/week range
-  let unsubscribeBookings = null;
-  function watchBookingsForRange(dates){
-    // dates => array of 'YYYY-MM-DD'
-    if(unsubscribeBookings) unsubscribeBookings();
-    if(dates.length === 0) return;
-    // Query for multiple docs by id: Firestore doesn't support OR by doc ID easily, so we listen to collection and filter client-side for demo.
-    unsubscribeBookings = bookingsCol.onSnapshot(snapshot=>{
-      // Build map of docs we care about
-      const data = {};
-      snapshot.forEach(doc=>{
-        const id = doc.id;
-        if(dates.includes(id)) data[id] = doc.data();
-      });
-      // update UI using data
-      renderMonthGridFromData(data);
-      renderWeekGridFromData(data);
-    }, err=>{
-      console.error('bookings listener err', err);
+  const grid=document.getElementById("weekGrid");
+  grid.innerHTML="";
+
+  grid.innerHTML += `<div></div>`;
+  days.forEach(d=>grid.innerHTML+=`<div>${d.toLocaleDateString()}</div>`);
+
+  for(let h=0; h<24; h++){
+    grid.innerHTML+=`<div><b>${h}:00</b></div>`;
+    days.forEach(d=>{
+      const key=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+      if(!bookings[key]) bookings[key]={};
+      const hrKey=h;
+      const booked=bookings[key][hrKey]===true;
+      grid.innerHTML+=`
+        <div class="hour-box ${booked?"booked":"available"}" onclick="attemptBooking('${key}', ${hrKey})">
+          ${booked?"Booked":"Available"}
+        </div>`;
     });
   }
+}
 
-  // ---------- RENDER: Month ----------
-  function renderMonth(){
-    view = 'month';
-    monthView.style.display = 'block';
-    weekView.style.display = 'none';
-    monthGrid.innerHTML = '';
-    const first = new Date(cursorDate.getFullYear(), cursorDate.getMonth(), 1);
-    label.textContent = cursorDate.toLocaleString(undefined,{month:'long',year:'numeric'});
-    // find dates to show (mon-sun grid)
-    const start = new Date(first);
-    start.setDate(start.getDate() - start.getDay());
-    const dates = [];
-    for(let i=0;i<42;i++){
-      const d = new Date(start); d.setDate(start.getDate()+i);
-      const id = ymd(d);
-      dates.push(id);
-      const el = document.createElement('div'); el.className='day-card';
-      el.dataset.date = id;
-      el.innerHTML = `<div class="day-num">${d.getDate()}</div><div class="small-muted">${d.toLocaleDateString(undefined,{weekday:'short'})}</div><div class="slots" style="margin-top:8px"></div>`;
-      monthGrid.appendChild(el);
-    }
-    // request booking data for visible dates
-    watchBookingsForRange(dates);
-  }
+// ==========================
+//   PAYMENT + BOOKING
+// ==========================
+function attemptBooking(key, hour){
+  if(bookings[key] && bookings[key][hour]===true){ alert("Already booked."); return; }
+  const price=prompt("Set your price for this hour (USD):", "50");
+  if(!price) return;
 
-  // Called by listener to fill month grid using fetched bookings data
-  function renderMonthGridFromData(data){
-    // data: { 'YYYY-MM-DD': {...} }
-    document.querySelectorAll('.day-card').forEach(card=>{
-      const date = card.dataset.date;
-      const slots = card.querySelector('.slots');
-      slots.innerHTML = '';
-      const bookingsForDate = data[date] || {};
-      // show up to 5 sample slots (7-11) for compact month show
-      for(let h = START_HOUR; h < Math.min(START_HOUR+5, END_HOUR); h++){
-        const booked = bookingsForDate[String(h)] && bookingsForDate[String(h)].paid === true;
-        const span = document.createElement('span');
-        span.className = 'slot ' + (booked ? 'slot booked' : 'slot available');
-        span.textContent = hourLabel(h);
-        span.onclick = ()=> openBookingModal(date, h);
-        slots.appendChild(span);
-      }
-    });
-  }
+  // Simulated checkout link — replace with Stripe/PayPal
+  const proceed=confirm(`Pay $${price}?`);
+  if(!proceed) return;
 
-  // ---------- RENDER: Week ----------
-  function renderWeek(){
-    view='week';
-    monthView.style.display='none';
-    weekView.style.display='block';
-    // compute week start (mon)
-    const d = new Date(cursorDate);
-    const day = d.getDay();
-    const mon = new Date(d); mon.setDate(d.getDate() - (day === 0 ? 6 : day-1));
-    const dates = [];
-    const header = ['Time'];
-    for(let i=0;i<7;i++){
-      const dd = new Date(mon); dd.setDate(mon.getDate()+i);
-      dates.push(ymd(dd));
-      header.push(dd.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}));
-    }
-    // label + header
-    label.textContent = `${header[1]} — ${header[7] || header[6]}`;
-    weekHeader.innerHTML = '';
-    header.forEach(h => { const el = document.createElement('div'); el.textContent = h; weekHeader.appendChild(el); });
-    // body rows: one per hour
-    weekBody.innerHTML = '';
-    for(let h = START_HOUR; h < END_HOUR; h++){
-      const timeCell = document.createElement('div'); timeCell.className='time-cell'; timeCell.innerHTML = `<strong>${hourLabel(h)}</strong>`; weekBody.appendChild(timeCell);
-      dates.forEach(dt=>{
-        const dayCell = document.createElement('div'); dayCell.className='day-col';
-        const box = document.createElement('div'); box.className='hour-box hour-available'; box.textContent = 'Available';
-        box.dataset.date = dt; box.dataset.hour = String(h);
-        box.onclick = ()=> openBookingModal(dt, h);
-        dayCell.appendChild(box); weekBody.appendChild(dayCell);
-      });
-    }
-    // listen and fill
-    watchBookingsForRange(dates);
-  }
-
-  function renderWeekGridFromData(data){
-    // find all hour-boxes and paint
-    document.querySelectorAll('.hour-box').forEach(box=>{
-      const date = box.dataset.date;
-      const hour = box.dataset.hour;
-      const doc = data[date] || {};
-      const entry = doc[hour];
-      if(entry && entry.paid === true){
-        box.classList.remove('hour-available'); box.classList.add('hour-booked'); 
-        box.textContent = `Booked (${entry.name||'—'})`;
-        box.onclick = ()=> alert('This slot is already booked.');
-      } else {
-        box.classList.remove('hour-booked'); box.classList.add('hour-available');
-        box.textContent = 'Available';
-        box.onclick = ()=> openBookingModal(date, parseInt(hour,10));
-      }
-    });
-    // month grid also updated by same listener
-  }
-
-  // --------- Booking modal and payment flow ----------
-  function openBookingModal(date, hour){
-    // Must be signed in & verified to book
-    const user = auth.currentUser;
-    if(!user){
-      alert('Please sign in / sign up and verify your email before booking.');
-      return;
-    }
-    if(!user.emailVerified){
-      alert('Please verify your email (we sent a verification when you signed up).');
-      return;
-    }
-    selectedSlot = { date, hour };
-    document.getElementById('modalTitle').textContent = `Book ${date} @ ${hourLabel(hour)}`;
-    modalInfo.textContent = `You are booking as ${user.email}`;
-    modalPrice.value = 50; // default price - you can change
-    modalName.value = user.displayName || user.email.split('@')[0];
-    bookingModal.style.display = 'flex';
-  }
-
-  closeModal.onclick = ()=> { bookingModal.style.display = 'none'; selectedSlot = null; };
-  // Stripe payment: create a Checkout Session on server
-  payStripe.onclick = async ()=>{
-    if(!selectedSlot) return alert('No slot selected');
-    const price = Number(modalPrice.value) || 1;
-    const name = (modalName.value || '').trim();
-    const user = auth.currentUser;
-    // call server to create a Stripe session
-    const res = await fetch(`${API_BASE_URL}/create-stripe-session`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        date: selectedSlot.date, hour: selectedSlot.hour, price, name, uid: user.uid, email: user.email
-      })
-    });
-    const data = await res.json();
-    if(!data.url) return alert('Payment setup failed: '+ (data.error||'no url'));
-    // redirect to Stripe Checkout
-    window.location = data.url;
-  };
-
-  // PayPal payment: server creates an order and returns approval link
-  payPayPal.onclick = async ()=>{
-    if(!selectedSlot) return alert('No slot selected');
-    const price = Number(modalPrice.value) || 1;
-    const name = (modalName.value || '').trim();
-    const user = auth.currentUser;
-    const res = await fetch(`${API_BASE_URL}/create-paypal-order`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        date: selectedSlot.date, hour: selectedSlot.hour, price, name, uid: user.uid, email: user.email, returnUrl: location.href
-      })
-    });
-    const data = await res.json();
-    if(data && data.approvalUrl){
-      // open PayPal checkout in new tab
-      window.open(data.approvalUrl, '_blank');
-      alert('PayPal checkout opened — after completing payment, booking will be confirmed automatically.');
-      bookingModal.style.display = 'none';
-    } else {
-      alert('PayPal order creation failed');
-    }
-  };
-
-  // After redirect back from Stripe (success), the server should handle webhook and set Firestore booking to paid.
-  // For UX, you might implement a poll or show a "pending" state until webhook confirms.
-
-  // Start app
-  monthBtn.onclick = ()=> { renderMonth(); };
-  weekBtn.onclick = ()=> { renderWeek(); };
-  prevBtn.onclick = ()=> { if(view==='week'){ cursorDate.setDate(cursorDate.getDate()-7); renderWeek(); } else { cursorDate.setMonth(cursorDate.getMonth()-1); renderMonth(); } };
-  nextBtn.onclick = ()=> { if(view==='week'){ cursorDate.setDate(cursorDate.getDate()+7); renderWeek(); } else { cursorDate.setMonth(cursorDate.getMonth()+1); renderMonth(); } };
-
-  // default
+  // After payment success
+  bookings[key][hour]=true;
+  saveBookings();
   renderWeek();
-  </script>
+  renderMonth();
+}
+
+// Start in week view
+showWeek();
+</script>
 </body>
 </html>
