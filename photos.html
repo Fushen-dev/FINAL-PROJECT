@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Photos — Huanger Films</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">Huanger Films</h1>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="videos.html">Videos</a>
+        <a href="photos.html">Photos</a>
+        <a href="merch.html">Merch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Photos</h2>
+    <p>Place your photos in /assets and add metadata into <code>script.js</code> or use the quick-add below (local only).</p>
+
+    <section class="media-actions">
+      <h3>Add a photo (local only)</h3>
+      <input id="photo-title" placeholder="Title">
+      <input id="photo-file" type="file" accept="image/*">
+      <button id="add-photo-btn" class="btn">Add photo</button>
+    </section>
+
+    <section id="photos-grid" class="media-grid"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year-photo"></span> Huanger Films</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
