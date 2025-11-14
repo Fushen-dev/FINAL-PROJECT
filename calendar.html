@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calendar — Huanger Films</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">Huanger Films</h1>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="videos.html">Videos</a>
+        <a href="photos.html">Photos</a>
+        <a href="merch.html">Merch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Booking Calendar</h2>
+    <p>This calendar stores bookings locally in your browser. To make bookings shared for everyone, follow the Firebase instructions commented in <code>script.js</code> and paste your Firebase config there.</p>
+
+    <div id="calendar-controls" class="calendar-controls">
+      <label for="year-select">Year:</label>
+      <select id="year-select"></select>
+      <button id="today-btn" class="btn small">Today</button>
+      <span class="hint">Click a day to view or add bookings.</span>
+    </div>
+
+    <div id="calendar-wrapper"></div>
+
+    <section id="booking-panel" class="panel hidden">
+      <h3 id="booking-panel-date">Date</h3>
+      <ul id="bookings-list"></ul>
+
+      <h4>Add booking</h4>
+      <label>Title: <input id="booking-title" placeholder="e.g. Wedding - Smith"></label>
+      <label>Time: <input id="booking-time" type="time"></label>
+      <div class="panel-actions">
+        <button id="add-booking-btn" class="btn">Add Booking</button>
+        <button id="close-panel-btn" class="btn ghost">Close</button>
+      </div>
+    </section>
+
+    <section class="notes">
+      <h4>Notes</h4>
+      <p>Bookings are saved in your browser (localStorage) for demo. To sync bookings for everyone, enable Firebase — there's a ready-to-paste snippet in <code>script.js</code>.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year-cal"></span> Huanger Films</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
