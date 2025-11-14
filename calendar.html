@@ -160,6 +160,25 @@ function renderWeek(){
 // ==========================
 function attemptBooking(key, hour){
   if(bookings[key] && bookings[key][hour]===true){ alert("Already booked."); return; }
+
+<b>  const price = prompt("Price for this hour (USD):", "50");</b>
+  if(!price) return;
+
+  let usePayPal = confirm("Press OK for PayPal, or Cancel for Shopify Checkout.");
+
+  if(usePayPal){
+    window.location.href = "https://www.paypal.com/checkoutnow?token=REPLACE_WITH_YOUR_LIVE_PAYPAL_TOKEN";
+  } else {
+    window.location.href = "https://yourshopname.myshopify.com/cart/REPLACE_WITH_PRODUCT_ID:1";
+  }
+
+  alert("Replace the redirect return URL with an automatic booking confirmation.");
+
+  bookings[key][hour] = true;
+  saveBookings();
+  renderWeek();
+  renderMonth();
+}
   const price=prompt("Set your price for this hour (USD):", "50");
   if(!price) return;
 
@@ -177,5 +196,56 @@ function attemptBooking(key, hour){
 // Start in week view
 showWeek();
 </script>
+<!-- PAYMENT MODAL -->
+<div id="payModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center;">
+  <div style="background:white; padding:20px; border-radius:10px; width:300px; text-align:center;">
+    <h3>Complete Your Booking</h3>
+    <p>Select a payment method:</p>
+    <button id="paypalBtn" style="padding:10px 15px; margin:10px; cursor:pointer;">Pay with PayPal</button><br>
+    <button id="shopifyBtn" style="padding:10px 15px; margin:10px; cursor:pointer;">Pay with Shopify</button><br>
+    <button onclick="closeModal()" style="margin-top:15px;">Cancel</button>
+  </div>
+</div>
+
+<script>
+let pendingKey = null;
+let pendingHour = null;
+let pendingPrice = null;
+
+function closeModal(){ document.getElementById('payModal').style.display='none'; }
+
+function attemptBooking(key, hour){
+  if(bookings[key] && bookings[key][hour]===true){ alert("Already booked."); return; }
+
+  const price = prompt("Price for this hour (USD):", "50");
+  if(!price) return;
+
+  pendingKey = key;
+  pendingHour = hour;
+  pendingPrice = price;
+
+  document.getElementById('payModal').style.display = 'flex';
+}
+
+document.getElementById('paypalBtn').onclick = function(){
+  window.location.href = "https://www.paypal.com/checkoutnow?token=REPLACE_WITH_YOUR_LIVE_PAYPAL_TOKEN";
+  finalizeBooking();
+};
+
+document.getElementById('shopifyBtn').onclick = function(){
+  window.location.href = "https://yourshopname.myshopify.com/cart/REPLACE_WITH_PRODUCT_ID:1";
+  finalizeBooking();
+};
+
+function finalizeBooking(){
+  alert("After real payment, replace the return URL with automatic booking confirmation.");
+  bookings[pendingKey][pendingHour] = true;
+  saveBookings();
+  renderWeek();
+  renderMonth();
+  closeModal();
+}
+</script>
+
 </body>
 </html>
