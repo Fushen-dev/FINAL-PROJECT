@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Videos — Huanger Films</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">Huanger Films</h1>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="videos.html">Videos</a>
+        <a href="photos.html">Photos</a>
+        <a href="merch.html">Merch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Videos</h2>
+    <p>Place your video files in /assets (MP4 recommended) and add entries in the <code>script.js</code> <em>media</em> array or use the 'Add video' form (local only).</p>
+
+    <section class="media-actions">
+      <h3>Add a video (local only)</h3>
+      <input id="video-title" placeholder="Title">
+      <input id="video-file" type="file" accept="video/*">
+      <button id="add-video-btn" class="btn">Add video</button>
+    </section>
+
+    <section id="videos-grid" class="media-grid"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year-video"></span> Huanger Films</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
