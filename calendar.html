@@ -343,3 +343,16 @@
   </script>
 </body>
 </html>
+<script>
+  // TODO: Insert Firebase Config Here
+  const FIREBASE_CONFIG = { ... };
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<script>
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const db = firebase.firestore();
+</script>
+
