@@ -1,17 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Huanger Films — Calendar</title>
+  <style>
+    :root{
+      --accent:#0ea5e9;
+      --bg:#f7fbfc;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --danger:#ef4444;
+      --success:#16a34a;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);margin:0;color:#0f172a}
+    header{background:linear-gradient(90deg,var(--accent),#7dd3fc);padding:18px;color:#fff}
+    header .nav{max-width:1100px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:center}
+    header a{color:#fff;text-decoration:none;font-weight:600}
+    main.container{max-width:1100px;margin:18px auto;padding:12px}
+    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;justify-content:space-between}
+    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .ghost{background:transparent;border:1px solid rgba(15,23,42,0.08);color:var(--muted)}
+    .panel{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+    .views{display:flex;gap:12px}
+    .monthView, .weekView{flex:1}
+    .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .day-card{background:var(--card);border-radius:8px;padding:8px;min-height:110px;border:1px solid rgba(2,6,23,0.06)}
+    .day-num{font-weight:700;font-size:14px}
+    .small-muted{font-size:12px;color:var(--muted)}
+    .slot{display:inline-block;padding:6px 8px;border-radius:6px;margin:6px 6px 0 0;font-size:12px;cursor:pointer}
+    .slot.available{background:#ecfdf5;border:1px solid #bbf7d0;color:var(--success)}
+    .slot.booked{background:#fff1f2;border:1px solid #fecaca;color:var(--danger)}
+    .week-grid{overflow:auto;border-radius:10px;border:1px solid rgba(2,6,23,0.06)}
+    .week-header{display:grid;grid-template-columns:100px repeat(7,1fr);background:#fff;padding:8px;border-bottom:1px solid rgba(2,6,23,0.04)}
+    .week-body{display:grid;grid-template-columns:100px repeat(7,1fr)}
+    .time-cell{padding:6px;border-bottom:1px solid rgba(2,6,23,0.03);min-height:48px;background:#fff}
+    .day-col{padding:6px;border-bottom:1px solid rgba(2,6,23,0.03);min-height:48px;background:#fff}
+    .hour-box{border-radius:6px;padding:6px;text-align:center;cursor:pointer;user-select:none}
+    .hour-available{background:#ecfeff;border:1px solid #bbf7d0;color:#065f46}
+    .hour-booked{background:#fff1f2;border:1px solid #fecaca;color:#7f1d1d}
+    footer{padding:18px;text-align:center;color:var(--muted);font-size:14px}
+    @media(max-width:900px){
+      .month-grid{grid-template-columns:repeat(2,1fr)}
+      .week-header, .week-body{grid-template-columns:80px repeat(7,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a href="index.html">Home</a>
+      <a href="videos.html">Videos</a>
+      <a href="photos.html">Photos</a>
+      <a href="merch.html">Merch</a>
+      <a href="calendar.html" style="text-decoration:underline">Calendar</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="controls">
+      <div>
+        <button class="btn" id="monthBtn">Month</button>
+        <button class="btn ghost" id="weekBtn">Week</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="ghost" id="prevBtn">Prev</button>
+        <div id="label" class="small-muted"></div>
+        <button class="ghost" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <div class="views">
+      <div class="monthView panel" id="monthView" style="display:none">
+        <div class="month-grid" id="monthGrid"></div>
+      </div>
+
+      <div class="weekView panel" id="weekView">
+        <div class="week-grid" id="weekGrid">
+          <div class="week-header" id="weekHeader"></div>
+          <div class="week-body" id="weekBody"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; <span id="year"></span> Huanger Films
+  </footer>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
   // -----------------------------
-  // Calendar (Shopify Redirect Version)
+  // Calendar (Shopify Redirect Version) — FIXED
   // -----------------------------
 
   const START_HOUR = 7, END_HOUR = 20; 
-  const bookings = {}; // No payment tracking needed anymore.
+  // bookings intentionally empty since Shopify will handle payment/booking
+  const bookings = {}; 
 
   function pad(n){ return String(n).padStart(2,'0'); }
   function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
   function hourLabel(h){ return `${pad(h)}:00`; }
 
-  // UI refs
+  // UI refs (safe to query now)
   const monthBtn = document.getElementById('monthBtn'),
         weekBtn = document.getElementById('weekBtn'),
         prevBtn = document.getElementById('prevBtn'),
@@ -45,7 +137,8 @@
   // --- Shopify Redirect Handler ---
   function redirectToShopify(date, hour){
     const shopURL = "https://huanger-films.myshopify.com/";
-    window.location.href = shopURL + `?date=${date}&time=${hour}`;
+    // include date & time in query so you can read it in Shopify if needed
+    window.location.href = shopURL + `?date=${encodeURIComponent(date)}&time=${encodeURIComponent(hour)}`;
   }
 
   // --- Month View ---
@@ -90,6 +183,8 @@
       }
 
       el.appendChild(slotsWrap);
+      // Clicking the day card itself also redirects (same behavior)
+      el.onclick = ()=>redirectToShopify(key, START_HOUR);
       monthGrid.appendChild(el);
     }
   }
@@ -110,7 +205,10 @@
     const mon = getWeekStart(cursor);
     const dates = [];
 
-    weekHeader.innerHTML += `<div style="background:#f3f4f6"></div>`;
+    // empty corner cell
+    const corner = document.createElement('div');
+    corner.style.background = '#f3f4f6';
+    weekHeader.appendChild(corner);
 
     for(let i=0;i<7;i++){
       const dt = new Date(mon);
@@ -144,7 +242,8 @@
         slot.className = 'hour-box hour-available';
         slot.textContent = 'Available';
 
-        slot.onclick = ()=>redirectToShopify(key, h);
+        // redirect when available clicked
+        slot.addEventListener('click', ()=> redirectToShopify(key, h));
 
         cell.appendChild(slot);
         weekBody.appendChild(cell);
@@ -152,6 +251,14 @@
     }
   }
 
+  // initialize view
   showWeek();
+
+  // expose for debugging
+  window._hf = { renderMonth, renderWeek, redirectToShopify };
+});
 </script>
+
+</body>
+</html>
 
