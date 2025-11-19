@@ -1,264 +1,235 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Huanger Films — Calendar</title>
-  <style>
-    :root{
-      --accent:#0ea5e9;
-      --bg:#f7fbfc;
-      --card:#ffffff;
-      --muted:#6b7280;
-      --danger:#ef4444;
-      --success:#16a34a;
+<script type="module">
+// -----------------------------
+// FIREBASE SETUP
+// -----------------------------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+// ⭐⭐ INSERT YOUR FIREBASE CONFIG HERE ⭐⭐
+const firebaseConfig = {
+  apiKey: "YOUR-KEY",
+  authDomain: "YOUR.firebaseapp.com",
+  databaseURL: "https://YOUR.firebaseio.com",
+  projectId: "YOUR-ID",
+  storageBucket: "YOUR.appspot.com",
+  messagingSenderId: "YOUR-SENDER",
+  appId: "YOUR-APP-ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// -----------------------------
+// Calendar Settings
+// -----------------------------
+const START_HOUR = 7, END_HOUR = 20;
+
+// watcher storage
+let bookings = {};
+
+// Live Firebase Sync
+function watchBookings() {
+  const rootRef = ref(db, "bookings");
+  onValue(rootRef, snap => {
+    if (snap.exists()) {
+      bookings = snap.val();
+    } else {
+      bookings = {};
     }
-    *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);margin:0;color:#0f172a}
-    header{background:linear-gradient(90deg,var(--accent),#7dd3fc);padding:18px;color:#fff}
-    header .nav{max-width:1100px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:center}
-    header a{color:#fff;text-decoration:none;font-weight:600}
-    main.container{max-width:1100px;margin:18px auto;padding:12px}
-    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;justify-content:space-between}
-    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-    .ghost{background:transparent;border:1px solid rgba(15,23,42,0.08);color:var(--muted)}
-    .panel{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.06)}
-    .views{display:flex;gap:12px}
-    .monthView, .weekView{flex:1}
-    .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-    .day-card{background:var(--card);border-radius:8px;padding:8px;min-height:110px;border:1px solid rgba(2,6,23,0.06)}
-    .day-num{font-weight:700;font-size:14px}
-    .small-muted{font-size:12px;color:var(--muted)}
-    .slot{display:inline-block;padding:6px 8px;border-radius:6px;margin:6px 6px 0 0;font-size:12px;cursor:pointer}
-    .slot.available{background:#ecfdf5;border:1px solid #bbf7d0;color:var(--success)}
-    .slot.booked{background:#fff1f2;border:1px solid #fecaca;color:var(--danger)}
-    .week-grid{overflow:auto;border-radius:10px;border:1px solid rgba(2,6,23,0.06)}
-    .week-header{display:grid;grid-template-columns:100px repeat(7,1fr);background:#fff;padding:8px;border-bottom:1px solid rgba(2,6,23,0.04)}
-    .week-body{display:grid;grid-template-columns:100px repeat(7,1fr)}
-    .time-cell{padding:6px;border-bottom:1px solid rgba(2,6,23,0.03);min-height:48px;background:#fff}
-    .day-col{padding:6px;border-bottom:1px solid rgba(2,6,23,0.03);min-height:48px;background:#fff}
-    .hour-box{border-radius:6px;padding:6px;text-align:center;cursor:pointer;user-select:none}
-    .hour-available{background:#ecfeff;border:1px solid #bbf7d0;color:#065f46}
-    .hour-booked{background:#fff1f2;border:1px solid #fecaca;color:#7f1d1d}
-    footer{padding:18px;text-align:center;color:var(--muted);font-size:14px}
-    @media(max-width:900px){
-      .month-grid{grid-template-columns:repeat(2,1fr)}
-      .week-header, .week-body{grid-template-columns:80px repeat(7,1fr)}
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="nav">
-      <a href="index.html">Home</a>
-      <a href="videos.html">Videos</a>
-      <a href="photos.html">Photos</a>
-      <a href="merch.html">Merch</a>
-      <a href="calendar.html" style="text-decoration:underline">Calendar</a>
-    </div>
-  </header>
 
-  <main class="container">
-    <div class="controls">
-      <div>
-        <button class="btn" id="monthBtn">Month</button>
-        <button class="btn ghost" id="weekBtn">Week</button>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="ghost" id="prevBtn">Prev</button>
-        <div id="label" class="small-muted"></div>
-        <button class="ghost" id="nextBtn">Next</button>
-      </div>
-    </div>
-
-    <div class="views">
-      <div class="monthView panel" id="monthView" style="display:none">
-        <div class="month-grid" id="monthGrid"></div>
-      </div>
-
-      <div class="weekView panel" id="weekView">
-        <div class="week-grid" id="weekGrid">
-          <div class="week-header" id="weekHeader"></div>
-          <div class="week-body" id="weekBody"></div>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    &copy; <span id="year"></span> Huanger Films
-  </footer>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // -----------------------------
-  // Calendar (Shopify Redirect Version) — FIXED
-  // -----------------------------
-
-  const START_HOUR = 7, END_HOUR = 20; 
-  // bookings intentionally empty since Shopify will handle payment/booking
-  const bookings = {}; 
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
-  function hourLabel(h){ return `${pad(h)}:00`; }
-
-  // UI refs (safe to query now)
-  const monthBtn = document.getElementById('monthBtn'),
-        weekBtn = document.getElementById('weekBtn'),
-        prevBtn = document.getElementById('prevBtn'),
-        nextBtn = document.getElementById('nextBtn'),
-        labelEl = document.getElementById('label'),
-        monthView = document.getElementById('monthView'),
-        weekView = document.getElementById('weekView'),
-        monthGrid = document.getElementById('monthGrid'),
-        weekHeader = document.getElementById('weekHeader'),
-        weekBody = document.getElementById('weekBody');
-
-  let view = 'week';
-  let cursor = new Date();
-
-  function showMonth(){ view='month'; monthView.style.display='block'; weekView.style.display='none'; renderMonth(); }
-  function showWeek(){ view='week'; monthView.style.display='none'; weekView.style.display='block'; renderWeek(); }
-
-  monthBtn.addEventListener('click', showMonth);
-  weekBtn.addEventListener('click', showWeek);
-
-  prevBtn.addEventListener('click', ()=>{
-    if(view==='week'){ cursor.setDate(cursor.getDate() - 7); renderWeek(); }
-    else { cursor.setMonth(cursor.getMonth() - 1); renderMonth(); }
+    // Re-render current view
+    if (view === "week") renderWeek();
+    else renderMonth();
   });
+}
+watchBookings();
 
-  nextBtn.addEventListener('click', ()=>{
-    if(view==='week'){ cursor.setDate(cursor.getDate() + 7); renderWeek(); }
-    else { cursor.setMonth(cursor.getMonth() + 1); renderMonth(); }
-  });
+// -----------------------------
+// Helpers
+// -----------------------------
+function pad(n){ return String(n).padStart(2,'0'); }
+function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function hourLabel(h){ return `${pad(h)}:00`; }
 
-  // --- Shopify Redirect Handler ---
-  function redirectToShopify(date, hour){
-    const shopURL = "https://huanger-films.myshopify.com/";
-    // include date & time in query so you can read it in Shopify if needed
-    window.location.href = shopURL + `?date=${encodeURIComponent(date)}&time=${encodeURIComponent(hour)}`;
-  }
+function isBooked(date, hour) {
+  return bookings?.[date]?.[hour] === true;
+}
 
-  // --- Month View ---
-  function renderMonth(){
-    monthGrid.innerHTML = '';
-    const year = cursor.getFullYear(), month = cursor.getMonth();
-    labelEl.textContent = cursor.toLocaleString(undefined,{month:'long', year:'numeric'});
+// -----------------------------
+// Shopify Redirect
+// -----------------------------
+function redirectToShopify(date, hour) {
+  const shopURL = "https://huanger-films.myshopify.com/";
+  window.location.href = `${shopURL}?date=${date}&time=${hour}`;
+}
 
-    const first = new Date(year, month, 1);
-    const startDay = first.getDay();
-    const startDate = new Date(first);
-    startDate.setDate(first.getDate() - startDay);
+// -----------------------------
+// Mark booked in Firebase
+// (You can call this after Shopify payment callback)
+// -----------------------------
+export function markBooked(date, hour) {
+  set(ref(db, `bookings/${date}/${hour}`), true);
+}
 
-    for(let i=0;i<42;i++){
-      const d = new Date(startDate);
-      d.setDate(startDate.getDate() + i);
-      const key = ymd(d);
+// -----------------------------
+// UI Elements
+// -----------------------------
+const monthBtn = document.getElementById('monthBtn'),
+      weekBtn = document.getElementById('weekBtn'),
+      prevBtn = document.getElementById('prevBtn'),
+      nextBtn = document.getElementById('nextBtn'),
+      labelEl = document.getElementById('label'),
+      monthView = document.getElementById('monthView'),
+      weekView = document.getElementById('weekView'),
+      monthGrid = document.getElementById('monthGrid'),
+      weekHeader = document.getElementById('weekHeader'),
+      weekBody = document.getElementById('weekBody');
 
-      const el = document.createElement('div');
-      el.className = 'day-card';
-      el.dataset.date = key;
+let view = 'week';
+let cursor = new Date();
 
-      const dayNum = document.createElement('div');
-      dayNum.className='day-num';
-      dayNum.textContent = d.getDate();
-      el.appendChild(dayNum);
+// Events
+monthBtn.onclick = () => { view='month'; monthView.style.display='block'; weekView.style.display='none'; renderMonth(); };
+weekBtn.onclick = () => { view='week'; monthView.style.display='none'; weekView.style.display='block'; renderWeek(); };
 
-      const weekday = document.createElement('div');
-      weekday.className='small-muted';
-      weekday.textContent = d.toLocaleDateString(undefined,{weekday:'short'});
-      el.appendChild(weekday);
+prevBtn.onclick = () => {
+  if (view === 'week') cursor.setDate(cursor.getDate()-7);
+  else cursor.setMonth(cursor.getMonth()-1);
+  render();
+};
+nextBtn.onclick = () => {
+  if (view === 'week') cursor.setDate(cursor.getDate()+7);
+  else cursor.setMonth(cursor.getMonth()+1);
+  render();
+};
 
-      const slotsWrap = document.createElement('div');
-      slotsWrap.style.marginTop='8px';
+function render() { view === 'week' ? renderWeek() : renderMonth(); }
 
-      for(let h = START_HOUR; h < Math.min(START_HOUR+4, END_HOUR); h++){
-        const s = document.createElement('span');
-        s.className = 'slot available';
-        s.textContent = hourLabel(h);
-        s.onclick = (ev)=>{ ev.stopPropagation(); redirectToShopify(key, h); };
-        slotsWrap.appendChild(s);
+// -----------------------------
+// MONTH VIEW
+// -----------------------------
+function renderMonth(){
+  monthGrid.innerHTML = '';
+  const y = cursor.getFullYear();
+  const m = cursor.getMonth();
+
+  labelEl.textContent = cursor.toLocaleString(undefined, { month:'long', year:'numeric' });
+
+  const first = new Date(y, m, 1);
+  const startDay = first.getDay();
+  const startDate = new Date(first);
+  startDate.setDate(first.getDate() - startDay);
+
+  for (let i=0;i<42;i++){
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const key = ymd(d);
+
+    const el = document.createElement('div');
+    el.className = 'day-card';
+
+    el.innerHTML = `
+      <div class="day-num">${d.getDate()}</div>
+      <div class="small-muted">${d.toLocaleDateString(undefined,{weekday:'short'})}</div>
+    `;
+
+    const slotsWrap = document.createElement('div');
+    slotsWrap.style.marginTop='8px';
+
+    for(let h = START_HOUR; h < START_HOUR+3; h++){
+      const booked = isBooked(key, h);
+      const s = document.createElement('span');
+      s.className = 'slot ' + (booked ? 'booked' : 'available');
+      s.textContent = hourLabel(h);
+
+      if (!booked) {
+        s.onclick = (ev)=>{
+          ev.stopPropagation();
+          redirectToShopify(key, h);
+        };
       }
 
-      el.appendChild(slotsWrap);
-      // Clicking the day card itself also redirects (same behavior)
-      el.onclick = ()=>redirectToShopify(key, START_HOUR);
-      monthGrid.appendChild(el);
-    }
-  }
-
-  // --- Week View ---
-  function getWeekStart(d){
-    const dd = new Date(d);
-    const day = dd.getDay();
-    const mon = new Date(dd);
-    mon.setDate(dd.getDate() - (day === 0 ? 6 : day - 1));
-    return mon;
-  }
-
-  function renderWeek(){
-    weekHeader.innerHTML = '';
-    weekBody.innerHTML = '';
-
-    const mon = getWeekStart(cursor);
-    const dates = [];
-
-    // empty corner cell
-    const corner = document.createElement('div');
-    corner.style.background = '#f3f4f6';
-    weekHeader.appendChild(corner);
-
-    for(let i=0;i<7;i++){
-      const dt = new Date(mon);
-      dt.setDate(mon.getDate() + i);
-      dates.push(dt);
-
-      const th = document.createElement('div');
-      th.style.padding = '8px';
-      th.style.fontWeight = '600';
-      th.style.background = '#fafafa';
-      th.textContent = dt.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
-      weekHeader.appendChild(th);
+      slotsWrap.appendChild(s);
     }
 
-    labelEl.textContent = `${dates[0].toLocaleDateString()} – ${dates[6].toLocaleDateString()}`;
+    el.appendChild(slotsWrap);
 
-    for(let h = START_HOUR; h < END_HOUR; h++){
-      const timeCell = document.createElement('div');
-      timeCell.className = 'time-cell';
-      timeCell.innerHTML = `<strong>${hourLabel(h)}</strong>`;
-      weekBody.appendChild(timeCell);
+    // Clicking the whole day sends user to first available time
+    el.onclick = () => redirectToShopify(key, START_HOUR);
 
-      for(let i=0;i<7;i++){
-        const dt = dates[i];
-        const key = ymd(dt);
+    monthGrid.appendChild(el);
+  }
+}
 
-        const cell = document.createElement('div');
-        cell.className = 'day-col';
+// -----------------------------
+// WEEK VIEW
+// -----------------------------
+function getWeekStart(d) {
+  const dd = new Date(d);
+  const day = dd.getDay();
+  const mon = new Date(dd);
+  mon.setDate(dd.getDate() - (day===0 ? 6 : day-1));
+  return mon;
+}
 
-        const slot = document.createElement('div');
-        slot.className = 'hour-box hour-available';
-        slot.textContent = 'Available';
+function renderWeek(){
+  weekHeader.innerHTML = '';
+  weekBody.innerHTML = '';
 
-        // redirect when available clicked
-        slot.addEventListener('click', ()=> redirectToShopify(key, h));
+  const mon = getWeekStart(cursor);
+  const dates = [];
 
-        cell.appendChild(slot);
-        weekBody.appendChild(cell);
+  const corner = document.createElement('div');
+  corner.style.background = '#f3f4f6';
+  weekHeader.appendChild(corner);
+
+  for (let i=0;i<7;i++){
+    const dt = new Date(mon);
+    dt.setDate(mon.getDate() + i);
+    dates.push(dt);
+
+    const th = document.createElement('div');
+    th.style.padding = '8px';
+    th.style.fontWeight='600';
+    th.style.background='#fafafa';
+    th.textContent = dt.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+    weekHeader.appendChild(th);
+  }
+
+  labelEl.textContent = `${dates[0].toLocaleDateString()} – ${dates[6].toLocaleDateString()}`;
+
+  for (let h=START_HOUR; h<END_HOUR; h++){
+    const timeCell = document.createElement('div');
+    timeCell.className='time-cell';
+    timeCell.innerHTML = `<strong>${hourLabel(h)}</strong>`;
+    weekBody.appendChild(timeCell);
+
+    for (let i=0;i<7;i++){
+      const dt = dates[i];
+      const key = ymd(dt);
+
+      const cell = document.createElement('div');
+      cell.className = 'day-col';
+
+      const box = document.createElement('div');
+
+      if (isBooked(key,h)) {
+        box.className = 'hour-box hour-booked';
+        box.textContent = 'Booked';
+      } else {
+        box.className = 'hour-box hour-available';
+        box.textContent = 'Available';
+        box.onclick = () => redirectToShopify(key,h);
       }
+
+      cell.appendChild(box);
+      weekBody.appendChild(cell);
     }
   }
+}
 
-  // initialize view
-  showWeek();
-
-  // expose for debugging
-  window._hf = { renderMonth, renderWeek, redirectToShopify };
-});
+// Initialize
+render();
 </script>
 
-</body>
-</html>
 
