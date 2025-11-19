@@ -5,20 +5,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// ⭐⭐ INSERT YOUR FIREBASE CONFIG ⭐⭐
 const firebaseConfig = {
-  apiKey: "var admin = require("firebase-admin");
-
-var serviceAccount = require("path/to/serviceAccountKey.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
-",
+  apiKey: "AIzaSyDB4SOUmddsEbhs_HHsrRGUBDX5PLU9hiE",
   authDomain: "huanger-films.firebaseapp.com",
-  databaseURL: "https://YOUR.firebaseio.com",
+  databaseURL: "https://huanger-films-default-rtdb.firebaseio.com",
   projectId: "huanger-films",
-  storageBucket: "YOUR.appspot.com",
+  storageBucket: "huanger-films.firebasestorage.app",
   messagingSenderId: "790500951380",
   appId: "1:790500951380:web:c8a93a4b21caef24d174c1"
 };
@@ -30,9 +22,9 @@ const db = getDatabase(app);
 // GLOBALS
 // -----------------------------
 const START_HOUR = 7, END_HOUR = 20;
-let bookings = {}; // Firebase-synced
+let bookings = {}; // Firebase realtime sync
 
-// Listen to realtime updates
+// Sync realtime bookings
 onValue(ref(db, "bookings"), snap => {
   bookings = snap.exists() ? snap.val() : {};
   render();
@@ -42,25 +34,21 @@ onValue(ref(db, "bookings"), snap => {
 function pad(n){ return String(n).padStart(2,'0'); }
 function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function hourLabel(h){ return `${pad(h)}:00`; }
-function isBooked(d,h){ return bookings?.[d]?.[h] === true; }
+function isBooked(date, hour){ return bookings?.[date]?.[hour] === true; }
 
 // -----------------------------
 // MOCK PAYMENT POPUP
 // -----------------------------
 function mockPay(date, hour) {
-  const confirmed = confirm(
-    `Mock Payment\n\nBook ${date} at ${hourLabel(hour)} for $20?\n`
-  );
+  const ok = confirm(`Mock Payment\n\nBook ${date} at ${hourLabel(hour)}?\n`);
+  if (!ok) return;
 
-  if (!confirmed) return;
-
-  // Mark booked in Firebase
   set(ref(db, `bookings/${date}/${hour}`), true);
-  alert("Payment complete! Slot booked.");
+  alert("Booking confirmed!");
 }
 
 // -----------------------------
-// UI ELEMENTS
+// ELEMENTS
 // -----------------------------
 const monthBtn = document.getElementById('monthBtn');
 const weekBtn = document.getElementById('weekBtn');
@@ -76,63 +64,80 @@ const weekBody = document.getElementById('weekBody');
 let view = "week";
 let cursor = new Date();
 
-monthBtn.onclick = () => { view="month"; monthView.style.display="block"; weekView.style.display="none"; renderMonth(); };
-weekBtn.onclick = () => { view="week"; monthView.style.display="none"; weekView.style.display="block"; renderWeek(); };
+monthBtn.onclick = () => {
+  view = "month";
+  monthView.style.display = "block";
+  weekView.style.display = "none";
+  renderMonth();
+};
+
+weekBtn.onclick = () => {
+  view = "week";
+  monthView.style.display = "none";
+  weekView.style.display = "block";
+  renderWeek();
+};
 
 prevBtn.onclick = () => {
-  view === "week" ? cursor.setDate(cursor.getDate()-7) : cursor.setMonth(cursor.getMonth()-1);
+  view === "week"
+    ? cursor.setDate(cursor.getDate() - 7)
+    : cursor.setMonth(cursor.getMonth() - 1);
   render();
 };
+
 nextBtn.onclick = () => {
-  view === "week" ? cursor.setDate(cursor.getDate()+7) : cursor.setMonth(cursor.getMonth()+1);
+  view === "week"
+    ? cursor.setDate(cursor.getDate() + 7)
+    : cursor.setMonth(cursor.getMonth() + 1);
   render();
 };
 
 // -----------------------------
 // MONTH VIEW
 // -----------------------------
-function renderMonth(){
+function renderMonth() {
   monthGrid.innerHTML = "";
-  labelEl.textContent = cursor.toLocaleString(undefined,{month:'long',year:'numeric'});
+  labelEl.textContent = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
 
   const y = cursor.getFullYear();
   const m = cursor.getMonth();
-  const first = new Date(y,m,1);
+  const first = new Date(y, m, 1);
   const startDay = first.getDay();
   const start = new Date(first);
   start.setDate(first.getDate() - startDay);
 
-  for (let i=0;i<42;i++){
+  for (let i = 0; i < 42; i++) {
     const d = new Date(start);
-    d.setDate(start.getDate()+i);
-    const key = ymd(d);
+    d.setDate(start.getDate() + i);
+
+    const dateKey = ymd(d);
 
     const card = document.createElement("div");
     card.className = "day-card";
 
     card.innerHTML = `
       <div class="day-num">${d.getDate()}</div>
-      <div class="small-muted">${d.toLocaleDateString(undefined,{weekday:'short'})}</div>
+      <div class="small-muted">${d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
     `;
 
     const wrap = document.createElement("div");
     wrap.style.marginTop = "8px";
 
-    for (let h=START_HOUR; h<START_HOUR+3; h++){
-      const el = document.createElement("span");
-      const booked = isBooked(key, h);
+    for (let h = START_HOUR; h < START_HOUR + 3; h++) {
+      const slot = document.createElement("span");
+      const booked = isBooked(dateKey, h);
 
-      el.className = "slot " + (booked ? "booked" : "available");
-      el.textContent = hourLabel(h);
+      slot.className = "slot " + (booked ? "booked" : "available");
+      slot.textContent = hourLabel(h);
 
-      if (!booked){
-        el.onclick = (ev)=>{
-          ev.stopPropagation();
-          mockPay(key, h);
+      if (!booked) {
+        slot.onclick = event => {
+          event.stopPropagation();
+          mockPay(dateKey, h);
         };
       }
 
-      wrap.appendChild(el);
+      wrap.appendChild(slot);
     }
 
     card.appendChild(wrap);
@@ -143,62 +148,62 @@ function renderMonth(){
 // -----------------------------
 // WEEK VIEW
 // -----------------------------
-function getWeekStart(d){
+function getWeekStart(d) {
   const dd = new Date(d);
   const day = dd.getDay();
   const monday = new Date(dd);
-  monday.setDate(dd.getDate() - (day===0 ? 6 : day-1));
+  monday.setDate(dd.getDate() - (day === 0 ? 6 : day - 1));
   return monday;
 }
 
-function renderWeek(){
+function renderWeek() {
   weekHeader.innerHTML = "";
   weekBody.innerHTML = "";
 
-  const mon = getWeekStart(cursor);
+  const monday = getWeekStart(cursor);
   const dates = [];
 
-  const corner = document.createElement("div");
-  weekHeader.appendChild(corner);
+  weekHeader.appendChild(document.createElement("div")); // corner
 
-  for (let i=0;i<7;i++){
-    const dt = new Date(mon);
-    dt.setDate(mon.getDate()+i);
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(monday);
+    dt.setDate(monday.getDate() + i);
     dates.push(dt);
 
     const head = document.createElement("div");
-    head.style.padding = "8px";
-    head.style.background = "#fafafa";
-    head.style.fontWeight = "600";
-    head.textContent = dt.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+    head.className = "week-head";
+    head.textContent = dt.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric"
+    });
     weekHeader.appendChild(head);
   }
 
   labelEl.textContent = `${dates[0].toLocaleDateString()} — ${dates[6].toLocaleDateString()}`;
 
-  for (let h=START_HOUR; h<END_HOUR; h++){
-    const time = document.createElement("div");
-    time.className = "time-cell";
-    time.innerHTML = `<strong>${hourLabel(h)}</strong>`;
-    weekBody.appendChild(time);
+  for (let h = START_HOUR; h < END_HOUR; h++) {
+    const timeCol = document.createElement("div");
+    timeCol.className = "time-cell";
+    timeCol.innerHTML = `<strong>${hourLabel(h)}</strong>`;
+    weekBody.appendChild(timeCol);
 
-    for (let i=0;i<7;i++){
-      const dt = dates[i];
-      const key = ymd(dt);
+    for (let i = 0; i < 7; i++) {
+      const key = ymd(dates[i]);
 
       const cell = document.createElement("div");
       cell.className = "day-col";
 
       const box = document.createElement("div");
-      const booked = isBooked(key,h);
+      const booked = isBooked(key, h);
 
-      if (booked){
+      if (booked) {
         box.className = "hour-box hour-booked";
         box.textContent = "Booked";
       } else {
         box.className = "hour-box hour-available";
         box.textContent = "Available";
-        box.onclick = () => mockPay(key,h);
+        box.onclick = () => mockPay(key, h);
       }
 
       cell.appendChild(box);
@@ -208,12 +213,11 @@ function renderWeek(){
 }
 
 // -----------------------------
-// MAIN RENDER
+// MAIN RENDER LOOP
 // -----------------------------
-function render(){
+function render() {
   view === "week" ? renderWeek() : renderMonth();
 }
 
 render();
 </script>
-
