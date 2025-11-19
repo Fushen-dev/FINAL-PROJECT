@@ -1,223 +1,409 @@
-<script type="module">
-// -----------------------------
-// FIREBASE SETUP
-// -----------------------------
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendar — Huanger Films</title>
+  <link rel="stylesheet" href="style.css">
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDB4SOUmddsEbhs_HHsrRGUBDX5PLU9hiE",
-  authDomain: "huanger-films.firebaseapp.com",
-  databaseURL: "https://huanger-films-default-rtdb.firebaseio.com",
-  projectId: "huanger-films",
-  storageBucket: "huanger-films.firebasestorage.app",
-  messagingSenderId: "790500951380",
-  appId: "1:790500951380:web:c8a93a4b21caef24d174c1"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// -----------------------------
-// GLOBALS
-// -----------------------------
-const START_HOUR = 7, END_HOUR = 20;
-let bookings = {}; // Firebase realtime sync
-
-// Sync realtime bookings
-onValue(ref(db, "bookings"), snap => {
-  bookings = snap.exists() ? snap.val() : {};
-  render();
-});
-
-// Helpers
-function pad(n){ return String(n).padStart(2,'0'); }
-function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
-function hourLabel(h){ return `${pad(h)}:00`; }
-function isBooked(date, hour){ return bookings?.[date]?.[hour] === true; }
-
-// -----------------------------
-// MOCK PAYMENT POPUP
-// -----------------------------
-function mockPay(date, hour) {
-  const ok = confirm(`Mock Payment\n\nBook ${date} at ${hourLabel(hour)}?\n`);
-  if (!ok) return;
-
-  set(ref(db, `bookings/${date}/${hour}`), true);
-  alert("Booking confirmed!");
-}
-
-// -----------------------------
-// ELEMENTS
-// -----------------------------
-const monthBtn = document.getElementById('monthBtn');
-const weekBtn = document.getElementById('weekBtn');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const labelEl = document.getElementById('label');
-const monthView = document.getElementById('monthView');
-const weekView = document.getElementById('weekView');
-const monthGrid = document.getElementById('monthGrid');
-const weekHeader = document.getElementById('weekHeader');
-const weekBody = document.getElementById('weekBody');
-
-let view = "week";
-let cursor = new Date();
-
-monthBtn.onclick = () => {
-  view = "month";
-  monthView.style.display = "block";
-  weekView.style.display = "none";
-  renderMonth();
-};
-
-weekBtn.onclick = () => {
-  view = "week";
-  monthView.style.display = "none";
-  weekView.style.display = "block";
-  renderWeek();
-};
-
-prevBtn.onclick = () => {
-  view === "week"
-    ? cursor.setDate(cursor.getDate() - 7)
-    : cursor.setMonth(cursor.getMonth() - 1);
-  render();
-};
-
-nextBtn.onclick = () => {
-  view === "week"
-    ? cursor.setDate(cursor.getDate() + 7)
-    : cursor.setMonth(cursor.getMonth() + 1);
-  render();
-};
-
-// -----------------------------
-// MONTH VIEW
-// -----------------------------
-function renderMonth() {
-  monthGrid.innerHTML = "";
-  labelEl.textContent = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
-
-  const y = cursor.getFullYear();
-  const m = cursor.getMonth();
-  const first = new Date(y, m, 1);
-  const startDay = first.getDay();
-  const start = new Date(first);
-  start.setDate(first.getDate() - startDay);
-
-  for (let i = 0; i < 42; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-
-    const dateKey = ymd(d);
-
-    const card = document.createElement("div");
-    card.className = "day-card";
-
-    card.innerHTML = `
-      <div class="day-num">${d.getDate()}</div>
-      <div class="small-muted">${d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
-    `;
-
-    const wrap = document.createElement("div");
-    wrap.style.marginTop = "8px";
-
-    for (let h = START_HOUR; h < START_HOUR + 3; h++) {
-      const slot = document.createElement("span");
-      const booked = isBooked(dateKey, h);
-
-      slot.className = "slot " + (booked ? "booked" : "available");
-      slot.textContent = hourLabel(h);
-
-      if (!booked) {
-        slot.onclick = event => {
-          event.stopPropagation();
-          mockPay(dateKey, h);
-        };
-      }
-
-      wrap.appendChild(slot);
+  <style>
+    /* Bauer Themed Calendar Styling */
+    .calendar-page {
+      margin-top: 30px;
     }
 
-    card.appendChild(wrap);
-    monthGrid.appendChild(card);
-  }
-}
+    .calendar-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
 
-// -----------------------------
-// WEEK VIEW
-// -----------------------------
-function getWeekStart(d) {
-  const dd = new Date(d);
-  const day = dd.getDay();
-  const monday = new Date(dd);
-  monday.setDate(dd.getDate() - (day === 0 ? 6 : day - 1));
-  return monday;
-}
+    .calendar-controls button {
+      padding: 8px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-function renderWeek() {
-  weekHeader.innerHTML = "";
-  weekBody.innerHTML = "";
+    #label {
+      font-size: 22px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
 
-  const monday = getWeekStart(cursor);
-  const dates = [];
+    /* Month Grid */
+    #monthGrid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-  weekHeader.appendChild(document.createElement("div")); // corner
+    .day-card {
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
 
-  for (let i = 0; i < 7; i++) {
-    const dt = new Date(monday);
-    dt.setDate(monday.getDate() + i);
-    dates.push(dt);
+    .day-num {
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-    const head = document.createElement("div");
-    head.className = "week-head";
-    head.textContent = dt.toLocaleDateString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric"
+    .slot {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 5px;
+      margin-right: 6px;
+      margin-top: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .slot.available {
+      background: var(--accent);
+      color: white;
+    }
+
+    .slot.booked {
+      background: #555;
+      color: white;
+    }
+
+    /* Week view */
+    #weekHeader, #weekBody {
+      display: grid;
+      grid-template-columns: 100px repeat(7, 1fr);
+      margin-top: 20px;
+      gap: 8px;
+    }
+
+    .week-head {
+      background: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+
+    .time-cell {
+      background: #111;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .day-col {
+      background: #fff;
+      border-radius: 6px;
+      padding: 0;
+    }
+
+    .hour-box {
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+      margin: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .hour-available {
+      background: var(--accent);
+      color: white;
+    }
+
+    .hour-booked {
+      background: #444;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">HUANGER FILMS</h1>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="videos.html">Videos</a>
+        <a href="photos.html">Photos</a>
+        <a href="merch.html">Merch</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CALENDAR -->
+  <main class="container calendar-page">
+
+    <h2 style="font-size:30px; font-weight:700; text-transform:uppercase; margin-bottom:20px;">
+      Booking Calendar
+    </h2>
+
+    <!-- CONTROLS -->
+    <div class="calendar-controls">
+      <button id="weekBtn">Week</button>
+      <button id="monthBtn">Month</button>
+
+      <button id="prevBtn">◀</button>
+      <button id="nextBtn">▶</button>
+
+      <span id="label"></span>
+    </div>
+
+    <!-- WEEK VIEW -->
+    <div id="weekView" style="display:block;">
+      <div id="weekHeader"></div>
+      <div id="weekBody"></div>
+    </div>
+
+    <!-- MONTH VIEW -->
+    <div id="monthView" style="display:none;">
+      <div id="monthGrid"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> Huanger Films</p>
+    </div>
+  </footer>
+
+
+
+  <!-- YOUR JS (unchanged) -->
+  <script type="module">
+    // -----------------------------
+    // FIREBASE SETUP
+    // -----------------------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDB4SOUmddsEbhs_HHsrRGUBDX5PLU9hiE",
+      authDomain: "huanger-films.firebaseapp.com",
+      databaseURL: "https://huanger-films-default-rtdb.firebaseio.com",
+      projectId: "huanger-films",
+      storageBucket: "huanger-films.firebasestorage.app",
+      messagingSenderId: "790500951380",
+      appId: "1:790500951380:web:c8a93a4b21caef24d174c1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // -----------------------------
+    // GLOBALS
+    // -----------------------------
+    const START_HOUR = 7, END_HOUR = 20;
+    let bookings = {}; // Firebase realtime sync
+
+    // Sync realtime bookings
+    onValue(ref(db, "bookings"), snap => {
+      bookings = snap.exists() ? snap.val() : {};
+      render();
     });
-    weekHeader.appendChild(head);
-  }
 
-  labelEl.textContent = `${dates[0].toLocaleDateString()} — ${dates[6].toLocaleDateString()}`;
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+    function hourLabel(h){ return `${pad(h)}:00`; }
+    function isBooked(date, hour){ return bookings?.[date]?.[hour] === true; }
 
-  for (let h = START_HOUR; h < END_HOUR; h++) {
-    const timeCol = document.createElement("div");
-    timeCol.className = "time-cell";
-    timeCol.innerHTML = `<strong>${hourLabel(h)}</strong>`;
-    weekBody.appendChild(timeCol);
+    // -----------------------------
+    // MOCK PAYMENT
+    // -----------------------------
+    function mockPay(date, hour) {
+      const ok = confirm(`Mock Payment\n\nBook ${date} at ${hourLabel(hour)}?\n`);
+      if (!ok) return;
+      set(ref(db, `bookings/${date}/${hour}`), true);
+      alert("Booking confirmed!");
+    }
 
-    for (let i = 0; i < 7; i++) {
-      const key = ymd(dates[i]);
+    // -----------------------------
+    // ELEMENTS
+    // -----------------------------
+    const monthBtn = document.getElementById('monthBtn');
+    const weekBtn = document.getElementById('weekBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const labelEl = document.getElementById('label');
+    const monthView = document.getElementById('monthView');
+    const weekView = document.getElementById('weekView');
+    const monthGrid = document.getElementById('monthGrid');
+    const weekHeader = document.getElementById('weekHeader');
+    const weekBody = document.getElementById('weekBody');
 
-      const cell = document.createElement("div");
-      cell.className = "day-col";
+    let view = "week";
+    let cursor = new Date();
 
-      const box = document.createElement("div");
-      const booked = isBooked(key, h);
+    monthBtn.onclick = () => {
+      view = "month";
+      monthView.style.display = "block";
+      weekView.style.display = "none";
+      renderMonth();
+    };
 
-      if (booked) {
-        box.className = "hour-box hour-booked";
-        box.textContent = "Booked";
-      } else {
-        box.className = "hour-box hour-available";
-        box.textContent = "Available";
-        box.onclick = () => mockPay(key, h);
+    weekBtn.onclick = () => {
+      view = "week";
+      monthView.style.display = "none";
+      weekView.style.display = "block";
+      renderWeek();
+    };
+
+    prevBtn.onclick = () => {
+      view === "week"
+        ? cursor.setDate(cursor.getDate() - 7)
+        : cursor.setMonth(cursor.getMonth() - 1);
+      render();
+    };
+
+    nextBtn.onclick = () => {
+      view === "week"
+        ? cursor.setDate(cursor.getDate() + 7)
+        : cursor.setMonth(cursor.getMonth() + 1);
+      render();
+    };
+
+    // -----------------------------
+    // MONTH VIEW
+    // -----------------------------
+    function renderMonth() {
+      monthGrid.innerHTML = "";
+      labelEl.textContent = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
+
+      const y = cursor.getFullYear();
+      const m = cursor.getMonth();
+      const first = new Date(y, m, 1);
+      const startDay = first.getDay();
+      const start = new Date(first);
+      start.setDate(first.getDate() - startDay);
+
+      for (let i = 0; i < 42; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+
+        const dateKey = ymd(d);
+
+        const card = document.createElement("div");
+        card.className = "day-card";
+
+        card.innerHTML = `
+          <div class="day-num">${d.getDate()}</div>
+          <div class="small-muted">${d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
+        `;
+
+        const wrap = document.createElement("div");
+        wrap.style.marginTop = "8px";
+
+        for (let h = START_HOUR; h < START_HOUR + 3; h++) {
+          const slot = document.createElement("span");
+          const booked = isBooked(dateKey, h);
+
+          slot.className = "slot " + (booked ? "booked" : "available");
+          slot.textContent = hourLabel(h);
+
+          if (!booked) {
+            slot.onclick = event => {
+              event.stopPropagation();
+              mockPay(dateKey, h);
+            };
+          }
+
+          wrap.appendChild(slot);
+        }
+
+        card.appendChild(wrap);
+        monthGrid.appendChild(card);
+      }
+    }
+
+    // -----------------------------
+    // WEEK VIEW
+    // -----------------------------
+    function getWeekStart(d) {
+      const dd = new Date(d);
+      const day = dd.getDay();
+      const monday = new Date(dd);
+      monday.setDate(dd.getDate() - (day === 0 ? 6 : day - 1));
+      return monday;
+    }
+
+    function renderWeek() {
+      weekHeader.innerHTML = "";
+      weekBody.innerHTML = "";
+
+      const monday = getWeekStart(cursor);
+      const dates = [];
+
+      weekHeader.appendChild(document.createElement("div")); // empty corner
+
+      for (let i = 0; i < 7; i++) {
+        const dt = new Date(monday);
+        dt.setDate(monday.getDate() + i);
+        dates.push(dt);
+
+        const head = document.createElement("div");
+        head.className = "week-head";
+        head.textContent = dt.toLocaleDateString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric"
+        });
+        weekHeader.appendChild(head);
       }
 
-      cell.appendChild(box);
-      weekBody.appendChild(cell);
+      labelEl.textContent = `${dates[0].toLocaleDateString()} — ${dates[6].toLocaleDateString()}`;
+
+      for (let h = START_HOUR; h < END_HOUR; h++) {
+        const timeCol = document.createElement("div");
+        timeCol.className = "time-cell";
+        timeCol.innerHTML = `<strong>${hourLabel(h)}</strong>`;
+        weekBody.appendChild(timeCol);
+
+        for (let i = 0; i < 7; i++) {
+          const key = ymd(dates[i]);
+
+          const cell = document.createElement("div");
+          cell.className = "day-col";
+
+          const box = document.createElement("div");
+          const booked = isBooked(key, h);
+
+          if (booked) {
+            box.className = "hour-box hour-booked";
+            box.textContent = "Booked";
+          } else {
+            box.className = "hour-box hour-available";
+            box.textContent = "Available";
+            box.onclick = () => mockPay(key, h);
+          }
+
+          cell.appendChild(box);
+          weekBody.appendChild(cell);
+        }
+      }
     }
-  }
-}
 
-// -----------------------------
-// MAIN RENDER LOOP
-// -----------------------------
-function render() {
-  view === "week" ? renderWeek() : renderMonth();
-}
+    // -----------------------------
+    // MAIN RENDER LOOP
+    // -----------------------------
+    function render() {
+      view === "week" ? renderWeek() : renderMonth();
+    }
 
-render();
-</script>
+    render();
+  </script>
+
+</body>
+</html>
