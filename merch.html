@@ -5,45 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Merch — Huanger Films</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 25px;
-      margin-top: 30px;
-    }
-    .product-card {
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      background: #fafafa;
-    }
-    .product-card img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-    .pay-btn {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .paypal-btn {
-      background: #ffc439;
-    }
-    .stripe-btn {
-      background: #555;
-      color: white;
-    }
-  </style>
 </head>
 <body>
   <header class="site-header">
@@ -54,21 +15,21 @@
         <a href="calendar.html">Calendar</a>
         <a href="videos.html">Videos</a>
         <a href="photos.html">Photos</a>
-        <a href="merch.html">Merch</a>
+        <a class="active" href="merch.html">Merch</a>
       </nav>
     </div>
   </header>
 
-  <main class="container">
-    <h2>Merch Shop</h2>
-    <p>You can configure product names, photos, and prices in <code>script.js</code>.</p>
+  <main class="container page-section">
+    <h2 class="page-title">Merch Shop</h2>
+    <p class="page-subtext">You can configure product names, photos, and prices in <code>script.js</code>.</p>
 
     <section id="merch-grid" class="product-grid"></section>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p>&copy; <span id="year-merch"></span> Huanger Films</p>
+      <p>&copy; <span id="year-merch"></span> Huanger Films — Lucas Huang</p>
     </div>
   </footer>
 
