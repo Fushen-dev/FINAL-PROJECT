@@ -7,13 +7,20 @@ import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebase
 
 // ⭐⭐ INSERT YOUR FIREBASE CONFIG ⭐⭐
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR.firebaseapp.com",
+  apiKey: "var admin = require("firebase-admin");
+
+var serviceAccount = require("path/to/serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+",
+  authDomain: "huanger-films.firebaseapp.com",
   databaseURL: "https://YOUR.firebaseio.com",
-  projectId: "YOUR",
+  projectId: "huanger-films",
   storageBucket: "YOUR.appspot.com",
-  messagingSenderId: "YOUR",
-  appId: "YOUR"
+  messagingSenderId: "790500951380",
+  appId: "1:790500951380:web:c8a93a4b21caef24d174c1"
 };
 
 const app = initializeApp(firebaseConfig);
