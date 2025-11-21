@@ -5,24 +5,155 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Videos — Huanger Films</title>
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* -----------------------------
+       BAUER PREMIUM VIDEO PAGE
+    ------------------------------ */
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .page-subtext {
+      color: #ccc;
+      margin-bottom: 30px;
+      font-size: 1rem;
+    }
+
+    /* Upload Form Styling */
+    .media-actions {
+      background: #0c0c0c;
+      border: 1px solid #1b1b1b;
+      padding: 26px;
+      border-radius: 14px;
+      margin-bottom: 40px;
+      transition: border-color 0.25s ease;
+    }
+
+    .media-actions:hover {
+      border-color: #0af;
+    }
+
+    .media-actions h3 {
+      margin-bottom: 12px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .media-actions input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #0b0b0b;
+      color: white;
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .media-actions input:focus {
+      border-color: #0af;
+      outline: none;
+    }
+
+    /* Button */
+    .btn {
+      background: #0af;
+      color: black;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 8px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,170,255,0.38);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    /* -----------------------------
+       VIDEO GRID
+    ------------------------------ */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 28px;
+      margin-top: 20px;
+    }
+
+    .video-card {
+      background: #111;
+      border: 1px solid #242424;
+      padding: 14px;
+      border-radius: 14px;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      text-align: center;
+    }
+
+    .video-card:hover {
+      transform: translateY(-6px);
+      border-color: #0af;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+    }
+
+    .video-card video {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover video {
+      transform: scale(1.03);
+    }
+
+    .video-title {
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+  </style>
 </head>
+
+
 <body>
   <header class="site-header">
     <div class="container">
       <h1 class="brand">Huanger Films</h1>
+
       <nav class="main-nav">
         <a href="index.html">Home</a>
         <a href="calendar.html">Calendar</a>
-        <a href="videos.html">Videos</a>
+        <a class="active" href="videos.html">Videos</a>
         <a href="photos.html">Photos</a>
         <a href="merch.html">Merch</a>
       </nav>
     </div>
   </header>
 
+
   <main class="container">
-    <h2>Videos</h2>
-    <p>Place your video files in /assets (MP4 recommended) and add entries in the <code>script.js</code> <em>media</em> array or use the 'Add video' form (local only).</p>
+    <h2 class="page-title">Videos</h2>
+    <p class="page-subtext">
+      Add video files to <code>/assets</code> or upload locally for testing.
+    </p>
 
     <section class="media-actions">
       <h3>Add a video (local only)</h3>
@@ -34,9 +165,10 @@
     <section id="videos-grid" class="media-grid"></section>
   </main>
 
+
   <footer class="site-footer">
     <div class="container">
-      <p>&copy; <span id="year-video"></span> Huanger Films</p>
+      <p>&copy; <span id="year-video"></span> Huanger Films — Lucas Huang</p>
     </div>
   </footer>
 
