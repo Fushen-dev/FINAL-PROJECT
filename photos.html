@@ -1,175 +1,185 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Photos — Huanger Films</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Photos — Huanger Films</title>
+  <link rel="stylesheet" href="style.css">
 
-  <style>
-    /* -------------------------------
-       PHOTO PAGE — BAUER PREMIUM UI
-    --------------------------------*/
+  <style>
+    /* -------------------------------
+       PHOTO PAGE — BAUER PREMIUM UI
+    --------------------------------*/
 
-    .page-title {
-      font-size: 2rem;
-      font-weight: 800;
-      color: white;
-      margin-bottom: 6px;
-    }
+    .page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 6px;
+    }
 
-    .page-subtext {
-      color: #ccc;
-      margin-bottom: 30px;
-      font-size: 1rem;
-    }
+    .page-subtext {
+      color: #ccc;
+      margin-bottom: 30px;
+      font-size: 1rem;
+    }
 
-    /* Upload section */
-    .media-actions {
-      background: #111;
-      border: 1px solid #222;
-      padding: 25px;
-      border-radius: 14px;
-      margin-bottom: 40px;
-      transition: border-color 0.3s ease;
-    }
+    /* Upload section */
+    .media-actions {
+      background: #111;
+      border: 1px solid #222;
+      padding: 25px;
+      border-radius: 14px;
+      margin-bottom: 40px;
+      transition: border-color 0.3s ease;
+    }
 
-    .media-actions:hover {
-      border-color: #0af;
-    }
+    .media-actions:hover {
+      border-color: #0af;
+    }
 
-    .media-actions h3 {
-      margin-bottom: 12px;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: white;
-    }
+    .media-actions h3 {
+      margin-bottom: 12px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: white;
+    }
 
-    .media-actions input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      background: #0b0b0b;
-      color: white;
-      font-size: 1rem;
-      transition: border-color 0.2s ease;
-    }
+    .media-actions input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #0b0b0b;
+      color: white;
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+    }
 
-    .media-actions input:focus {
-      border-color: #0af;
-      outline: none;
-    }
+    .media-actions input:focus {
+      border-color: #0af;
+      outline: none;
+    }
 
-    /* Button */
-    .btn {
-      background: #0af;
-      color: black;
-      padding: 12px 20px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 1rem;
-      margin-top: 8px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+    /* Button */
+    .btn {
+      background: #0af;
+      color: black;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(0,170,255,0.4);
-    }
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0,170,255,0.4);
+    }
 
-    .btn:active {
-      transform: scale(0.96);
-    }
+    .btn:active {
+      transform: scale(0.96);
+    }
 
-    /* -------------------------------
-       PHOTO GRID
-    --------------------------------*/
-    .media-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 28px;
-      margin-top: 20px;
-    }
+    /* -------------------------------
+       PHOTO GRID
+    --------------------------------*/
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 28px;
+      margin-top: 20px;
+    }
 
-    .photo-card {
-      background: #111;
-      border: 1px solid #242424;
-      padding: 14px;
-      border-radius: 14px;
-      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-      text-align: center;
-    }
+    .photo-card {
+      background: #111;
+      border: 1px solid #242424;
+      padding: 14px;
+      border-radius: 14px;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      text-align: center;
+  </span> }
 
-    .photo-card:hover {
-      transform: translateY(-6px);
-      border-color: #0af;
-      box-shadow: 0 10px 26px rgba(0,0,0,0.45);
-    }
+    .photo-card:hover {
+      transform: translateY(-6px);
+      border-color: #0af;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+    }
 
-    .photo-card img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      transition: transform 0.3s ease;
-    }
+    .photo-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: transform 0.3s ease;
+    }
 
-    .photo-card:hover img {
-      transform: scale(1.03);
-    }
+    .photo-card:hover img {
+      transform: scale(1.03);
+  </span> }
 
-    .photo-title {
-      color: white;
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-  </style>
+    .photo-title {
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+  </style>
 </head>
 
 
 <body>
-  <header class="site-header">
-    <div class="container">
-      <h1 class="brand">Huanger Films</h1>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">Huanger Films</h1>
 
-      <nav class="main-nav">
-        <a href="index.html">Home</a>
-        <a href="calendar.html">Calendar</a>
-        <a href="videos.html">Videos</a>
-        <a class="active" href="photos.html">Photos</a>
-        <a href="merch.html">Merch</a>
-      </nav>
-    </div>
-  </header>
-
-
-  <main class="container">
-    <h2 class="page-title">Photos</h2>
-    <p class="page-subtext">Add your photos to <code>/assets</code> or upload locally for preview.</p>
-
-    <section class="media-actions">
-      <h3>Add a photo (local only)</h3>
-      <input id="photo-title" placeholder="Title">
-      <input id="photo-file" type="file" accept="image/*">
-      <button id="add-photo-btn" class="btn">Add photo</button>
-    </section>
-
-    <section id="photos-grid" class="media-grid"></section>
-  </main>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="videos.html">Videos</a>
+        <a class="active" href="photos.html">Photos</a>
+        <a href="merch.html">Merch</a>
+      </nav>
+    </div>
+  </header>
 
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>&copy; <span id="year-photo"></span> Huanger Films — Lucas Huang</p>
-    </div>
-  </footer>
+  <main class="container">
+    <h2 class="page-title">Photos</h2>
+    <p class="page-subtext">Add your photos to <code>/assets</code> or upload locally for preview.</p>
 
-  <script src="script.js"></script>
+    <section class="media-actions">
+      <h3>Add a photo (local only)</h3>
+      <input id="photo-title" placeholder="Title">
+      <input id="photo-file" type="file" accept="image/*">
+      <button id="add-photo-btn" class="btn">Add photo</button>
+    </section>
+
+    <section id="photos-grid" class="media-grid">
+            <div class="photo-card">
+        <img src="/assets/DSC04136.JPG" alt="Hockey players in blue and black jerseys skate on the ice.">
+        <h4 class="photo-title">Hockey Game Action</h4>
+      </div>
+
+            <div class="photo-card">
+        <img src="/assets/DSC03709.JPG" alt="A hockey player in a blue and black jersey takes a slapshot.">
+        <h4 class="photo-title">Hockey Player Slapshot</h4>
+      </div>
+    </section>
+  </main>
+
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year-photo"></span> Huanger Films — Lucas Huang</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
