@@ -2,103 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Merch — Huanger Films</title>
   <link rel="stylesheet" href="style.css">
-
-  <style>
-    /* -------------------------------
-       BAUER PREMIUM PRODUCT GRID
-    --------------------------------*/
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 32px;
-      margin-top: 40px;
-    }
-
-    .product-card {
-      background: #111;
-      border: 1px solid #242424;
-      border-radius: 14px;
-      padding: 18px;
-      text-align: center;
-      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-      box-shadow: 0 0 0px rgba(0,0,0,0.2);
-    }
-
-    .product-card:hover {
-      transform: translateY(-6px);
-      border-color: #0af;
-      box-shadow: 0 10px 26px rgba(0,0,0,0.45);
-    }
-
-    .product-card img {
-      width: 100%;
-      height: 240px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      transition: transform 0.3s ease;
-    }
-
-    .product-card:hover img {
-      transform: scale(1.04);
-    }
-
-    .product-name {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 6px;
-    }
-
-    .product-price {
-      font-size: 1rem;
-      color: #0af;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    /* -------------------------------
-       BAUER BUTTONS
-    --------------------------------*/
-    .pay-btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
-    }
-
-    .pay-btn:active {
-      transform: scale(0.96);
-    }
-
-    .mockpay-btn {
-      background: #0af;
-      color: black;
-    }
-
-    .mockpay-btn:hover {
-      background: #4cc8ff;
-      box-shadow: 0 6px 18px rgba(0,170,255,0.4);
-    }
-  </style>
 </head>
-
-
 <body>
   <header class="site-header">
     <div class="container">
-      <h1 class="brand">Huanger Films</h1>
-
+      <div class="brand">HUANGER FILMS</div>
       <nav class="main-nav">
         <a href="index.html">Home</a>
         <a href="calendar.html">Calendar</a>
@@ -109,21 +20,19 @@
     </div>
   </header>
 
-
-  <main class="container page-section">
+  <main class="container">
     <h2 class="page-title">Merch Shop</h2>
-    <p class="page-subtext">All product names, images, and prices are configured via <code>script.js</code>.</p>
+    <p class="page-subtext">Products are configured in <code>script.js</code>. Clicking "Buy (Mock)" will run a mock checkout.</p>
 
     <section id="merch-grid" class="product-grid"></section>
   </main>
 
-
   <footer class="site-footer">
     <div class="container">
-      <p>&copy; <span id="year-merch"></span> Huanger Films — Lucas Huang</p>
+      <p>&copy; <span id="year-merch"></span> Huanger Films</p>
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
