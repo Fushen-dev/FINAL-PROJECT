@@ -5,184 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Calendar — Huanger Films</title>
   <link rel="stylesheet" href="style.css">
-
   <style>
-    /* Page-specific Bauer Premium overrides */
-    :root{
+    :root {
       --panel-bg: #0f0f10;
       --card-elev: 0 12px 30px rgba(0,0,0,0.45);
       --glass: rgba(255,255,255,0.03);
+      --accent: #0077c9;
+      --text: #fff;
+      --card: #1a1a1a;
     }
 
-    .hero-compact{
-      height: 220px;
-      display:flex;
-      align-items:center;
-      background: linear-gradient(180deg, rgba(0,0,0,0.3), rgba(0,0,0,0.6)),
-                  url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1500&q=60") center/cover no-repeat;
-      color:var(--text);
-      margin-bottom: 18px;
-      border-bottom: 3px solid var(--accent);
-      position:relative;
-      overflow:hidden;
-    }
-    .hero-compact .hero-inner{
-      width:100%;
-      max-width:1100px;
-      margin: 0 auto;
-      padding: 28px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-    .hero-compact h1{
-      font-size:28px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-    }
-    .hero-compact p{ color: #d3dbe6; max-width:560px; margin-top:6px; }
-
-    /* Controls */
-    .controls-wrap{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin: 20px 0;
-      flex-wrap:wrap;
-    }
-    .controls-left{display:flex;gap:10px;align-items:center}
-    .controls-right{display:flex;gap:8px;align-items:center}
-
-    /* Animated buttons (refined) */
-    .btn {
-      position:relative;
-      overflow:hidden;
-      will-change:transform;
-      transition: transform .18s cubic-bezier(.2,.9,.3,1), box-shadow .18s ease;
-      box-shadow: none;
-    }
-    .btn:hover{ transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.45); }
-    .small-pill { padding:8px 12px; border-radius:999px; font-weight:700; font-size:14px; }
-
-    /* calendar containers */
-    .calendar-wrap{ display:flex; gap:20px; align-items:flex-start; }
-    .calendar-main{ flex:1; min-width:300px; }
-
-    /* month grid (premium) */
-    #monthGrid {
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:12px;
-      margin-top:18px;
-    }
-    .day-card {
-      background: linear-gradient(180deg,var(--card),var(--card));
-      border-radius:12px;
-      padding:14px;
-      min-height:120px;
-      box-shadow: var(--card-elev);
-      border:1px solid rgba(255,255,255,0.02);
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-    .day-card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.55); }
-
-    .day-num{ font-size:18px; font-weight:800; color:var(--text); }
-    .day-week{ font-size:12px; color:#9aa6b8; margin-top:6px; }
-
-    /* slot style */
-    .slot {
-      display:inline-block;
-      padding:6px 8px;
-      border-radius:8px;
-      margin:6px 6px 0 0;
-      font-weight:700;
-      font-size:13px;
-      letter-spacing:0.4px;
-      transition: transform .14s ease, box-shadow .14s ease, background .14s ease;
-    }
-    .slot.available {
-      background: linear-gradient(90deg,var(--accent), #0077c9);
-      color:#fff;
-      box-shadow: 0 8px 20px rgba(0,170,255,0.12);
-    }
-    .slot.available:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 18px 40px rgba(0,170,255,0.18);
-      cursor:pointer;
-    }
-    .slot.booked {
-      background:#2b2b2b;
-      color:#fff;
-      opacity:0.9;
-      cursor:not-allowed;
-    }
-
-    /* week view premium */
-    #weekHeader, #weekBody {
-      display:grid;
-      grid-template-columns: 90px repeat(7,1fr);
-      gap:10px;
-      align-items:start;
-    }
-    .week-head {
-      background: linear-gradient(180deg,var(--card), #0f0f10);
-      padding:10px;
-      border-radius:10px;
-      text-align:center;
-      font-weight:800;
-      color:var(--text);
-      border:1px solid rgba(255,255,255,0.03);
-    }
-
-    .time-cell{
-      background:transparent;
-      color:#bcd4ee;
-      padding:8px;
-      font-weight:800;
-      text-align:center;
-    }
-    .day-col{
-      background:transparent;
-      padding:8px;
-    }
-    .hour-box {
-      margin:6px;
-      border-radius:8px;
-      padding:10px;
-      font-weight:800;
-      transition: transform .16s ease, box-shadow .16s ease;
-    }
-    .hour-available {
-      background: linear-gradient(90deg,var(--accent), #0077c9);
-      color:white;
-      box-shadow: 0 10px 28px rgba(0,170,255,0.12);
-    }
-    .hour-available:hover{ transform: translateY(-5px); cursor:pointer; box-shadow: 0 20px 48px rgba(0,170,255,0.18); }
+    body { background:#0b0b0b; color:#fff; font-family:sans-serif; margin:0; padding:0; }
+    .container { max-width:1100px; margin:0 auto; padding:18px; }
+    .site-header, .site-footer { background:#111; padding:12px 18px; }
+    .main-nav a { color:#fff; margin-right:12px; text-decoration:none; }
+    .main-nav a.active { text-decoration:underline; }
+    .hero-compact { height:220px; display:flex; align-items:center; background: linear-gradient(180deg, rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1500&q=60") center/cover no-repeat; color:var(--text); margin-bottom: 18px; border-bottom:3px solid var(--accent); }
+    .hero-inner { width:100%; max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; padding:28px; }
+    h1,h2,h3 { margin:0; }
+    .btn { padding:8px 12px; border-radius:999px; background:var(--accent); color:#fff; border:none; cursor:pointer; font-weight:700; transition: transform .18s ease, box-shadow .18s ease; }
+    .btn:hover { transform: translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
+    .calendar-wrap { display:flex; gap:20px; align-items:flex-start; }
+    .calendar-main { flex:1; min-width:300px; background:var(--panel-bg); border-radius:12px; padding:18px; }
+    #monthGrid { display:grid; grid-template-columns:repeat(7,1fr); gap:12px; }
+    .day-card { background:var(--card); border-radius:12px; padding:14px; min-height:120px; box-shadow:var(--card-elev); border:1px solid rgba(255,255,255,0.02); transition: transform .18s ease, box-shadow .18s ease; }
+    .day-card:hover { transform:translateY(-6px); box-shadow:0 18px 40px rgba(0,0,0,0.55); }
+    .day-num { font-size:18px; font-weight:800; }
+    .day-week { font-size:12px; color:#9aa6b8; margin-top:6px; }
+    .slot { display:inline-block; padding:6px 8px; border-radius:8px; margin:6px 6px 0 0; font-weight:700; font-size:13px; letter-spacing:0.4px; transition: transform .14s ease, box-shadow .14s ease, background .14s ease; }
+    .slot.available { background: linear-gradient(90deg,var(--accent), #0077c9); color:#fff; box-shadow:0 8px 20px rgba(0,170,255,0.12); cursor:pointer; }
+    .slot.available:hover { transform: translateY(-4px) scale(1.02); box-shadow:0 18px 40px rgba(0,170,255,0.18); }
+    .slot.booked { background:#2b2b2b; color:#fff; opacity:0.9; cursor:not-allowed; display:flex; flex-direction:column; align-items:center; }
+    .slot button.cancel-btn { margin-top:4px; padding:2px 6px; border:none; border-radius:6px; background:#c93030; color:#fff; font-size:10px; cursor:pointer; }
+    #weekHeader, #weekBody { display:grid; grid-template-columns: 90px repeat(7,1fr); gap:10px; }
+    .week-head { background:var(--card); padding:10px; border-radius:10px; text-align:center; font-weight:800; }
+    .time-cell { background:transparent; color:#bcd4ee; padding:8px; font-weight:800; text-align:center; }
+    .day-col { background:transparent; padding:8px; }
+    .hour-box { margin:6px; border-radius:8px; padding:10px; font-weight:800; transition: transform .16s ease, box-shadow .16s ease; text-align:center; }
+    .hour-available { background: linear-gradient(90deg,var(--accent), #0077c9); color:white; box-shadow: 0 10px 28px rgba(0,170,255,0.12); cursor:pointer; }
+    .hour-available:hover{ transform: translateY(-5px); box-shadow:0 20px 48px rgba(0,170,255,0.18); }
     .hour-booked{ background:#2b2b2b; color:#ddd; }
-
-    /* transitions for switching views */
-    .fade-in {
-      animation: fadeIn .32s ease both;
-    }
-    @keyframes fadeIn {
-      from { opacity:0; transform: translateY(6px); }
-      to { opacity:1; transform: translateY(0); }
-    }
-
-    /* responsive */
-    @media(max-width:900px){
-      #monthGrid{ grid-template-columns: repeat(2,1fr); }
-      #weekHeader, #weekBody { grid-template-columns: 70px repeat(7,1fr); }
-      .hero-compact{ height:180px; }
-    }
+    @media(max-width:900px){ #monthGrid{ grid-template-columns:repeat(2,1fr); } #weekHeader, #weekBody{ grid-template-columns:70px repeat(7,1fr); } .hero-compact{ height:180px; } }
   </style>
 </head>
-
 <body>
-
-  <!-- HEADER -->
   <header class="site-header">
     <div class="container">
       <h1 class="brand">HUANGER FILMS</h1>
@@ -196,47 +62,38 @@
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="hero-compact" role="banner" aria-label="Calendar hero">
+  <section class="hero-compact">
     <div class="hero-inner">
       <div>
         <h1>Booking Calendar</h1>
-        <p>Real-time availability synced across users. Click any available slot to reserve via mock payment.</p>
+        <p>Real-time availability. Click available slots to book or cancel a day before.</p>
       </div>
-      <div style="text-align:right">
-        <a class="btn small-pill" href="index.html">Back to Home</a>
+      <div>
+        <a class="btn" href="index.html">Back to Home</a>
       </div>
     </div>
   </section>
 
-  <!-- MAIN -->
   <main class="container calendar-wrap">
-
-    <div class="calendar-main panel fade-in">
-
-      <!-- controls -->
+    <div class="calendar-main panel">
       <div class="controls-wrap">
         <div class="controls-left">
-          <button id="weekBtn" class="btn small-pill">Week</button>
-          <button id="monthBtn" class="btn ghost small-pill">Month</button>
-          <div style="width:10px"></div>
-          <button id="prevBtn" class="btn small-pill">◀ Prev</button>
-          <button id="nextBtn" class="btn small-pill">Next ▶</button>
+          <button id="weekBtn" class="btn">Week</button>
+          <button id="monthBtn" class="btn">Month</button>
+          <button id="prevBtn" class="btn">◀ Prev</button>
+          <button id="nextBtn" class="btn">Next ▶</button>
         </div>
-
         <div class="controls-right">
           <div id="label" aria-live="polite" style="font-weight:800"></div>
         </div>
       </div>
 
-      <!-- week view -->
-      <div id="weekView" class="fade-in" style="display:block;">
+      <div id="weekView" style="display:block;">
         <div id="weekHeader"></div>
         <div id="weekBody" style="margin-top:12px;"></div>
       </div>
 
-      <!-- month view -->
-      <div id="monthView" class="fade-in" style="display:none;">
+      <div id="monthView" style="display:none;">
         <div id="monthGrid"></div>
       </div>
     </div>
@@ -248,10 +105,9 @@
     </div>
   </footer>
 
-  <!-- Firebase + Calendar JS (keeps your logic intact) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDB4SOUmddsEbhs_HHsrRGUBDX5PLU9hiE",
@@ -277,16 +133,27 @@
     function pad(n){ return String(n).padStart(2,'0'); }
     function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
     function hourLabel(h){ return `${pad(h)}:00`; }
-    function isBooked(date, hour){ return bookings?.[date]?.[hour] === true; }
-
-    function mockPay(date, hour) {
-      const ok = confirm(`Mock Payment\n\nBook ${date} at ${hourLabel(hour)}?\n`);
-      if (!ok) return;
-      set(ref(db, `bookings/${date}/${hour}`), true);
-      alert("Booking confirmed!");
+    function isBooked(date,h){ return bookings?.[date]?.[h] === true; }
+    function canCancel(date) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const d = new Date(date); d.setHours(0,0,0,0);
+      const diff = (d - today)/86400000;
+      return diff >= 1;
     }
 
-    // UI refs
+    function mockPay(date,h){
+      const ok = confirm(`Book ${date} at ${hourLabel(h)}?`);
+      if(!ok) return;
+      set(ref(db, `bookings/${date}/${h}`), true);
+    }
+
+    function mockCancel(date,h){
+      if(!canCancel(date)) { alert("Cannot cancel less than 1 day before."); return; }
+      const ok = confirm(`Cancel booking ${date} at ${hourLabel(h)}?`);
+      if(!ok) return;
+      remove(ref(db, `bookings/${date}/${h}`));
+    }
+
     const monthBtn = document.getElementById('monthBtn');
     const weekBtn = document.getElementById('weekBtn');
     const prevBtn = document.getElementById('prevBtn');
@@ -298,162 +165,64 @@
     const weekHeader = document.getElementById('weekHeader');
     const weekBody = document.getElementById('weekBody');
 
-    let view = "week";
-    let cursor = new Date();
+    let view = "week", cursor = new Date();
 
-    monthBtn.onclick = () => {
-      view = "month";
-      monthView.style.display = "block";
-      weekView.style.display = "none";
-      renderMonth();
-    };
+    monthBtn.onclick = () => { view="month"; monthView.style.display="block"; weekView.style.display="none"; renderMonth(); };
+    weekBtn.onclick = () => { view="week"; monthView.style.display="none"; weekView.style.display="block"; renderWeek(); };
+    prevBtn.onclick = () => { view==="week" ? cursor.setDate(cursor.getDate()-7) : cursor.setMonth(cursor.getMonth()-1); render(); };
+    nextBtn.onclick = () => { view==="week" ? cursor.setDate(cursor.getDate()+7) : cursor.setMonth(cursor.getMonth()+1); render(); };
 
-    weekBtn.onclick = () => {
-      view = "week";
-      monthView.style.display = "none";
-      weekView.style.display = "block";
-      renderWeek();
-    };
-
-    prevBtn.onclick = () => {
-      view === "week"
-        ? cursor.setDate(cursor.getDate() - 7)
-        : cursor.setMonth(cursor.getMonth() - 1);
-      render();
-    };
-
-    nextBtn.onclick = () => {
-      view === "week"
-        ? cursor.setDate(cursor.getDate() + 7)
-        : cursor.setMonth(cursor.getMonth() + 1);
-      render();
-    };
-
-    // MONTH
-    function renderMonth() {
-      monthGrid.innerHTML = "";
-      labelEl.textContent = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
-
-      const y = cursor.getFullYear();
-      const m = cursor.getMonth();
-      const first = new Date(y, m, 1);
-      const startDay = first.getDay();
-      const start = new Date(first);
-      start.setDate(first.getDate() - startDay);
-
-      for (let i = 0; i < 42; i++) {
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-
+    function renderMonth(){
+      monthGrid.innerHTML="";
+      labelEl.textContent = cursor.toLocaleString(undefined,{month:"long",year:"numeric"});
+      const y=cursor.getFullYear(), m=cursor.getMonth();
+      const first = new Date(y,m,1), startDay = first.getDay(), start=new Date(first); start.setDate(first.getDate()-startDay);
+      for(let i=0;i<42;i++){
+        const d=new Date(start); d.setDate(start.getDate()+i);
         const dateKey = ymd(d);
-
-        const card = document.createElement("div");
-        card.className = "day-card";
-
-        card.innerHTML = `
-          <div class="day-num">${d.getDate()}</div>
-          <div class="day-week">${d.toLocaleDateString(undefined, { weekday: 'short' })}</div>
-        `;
-
-        const wrap = document.createElement("div");
-        wrap.style.marginTop = "12px";
-
-        for (let h = START_HOUR; h < START_HOUR + 3; h++) {
-          const slot = document.createElement("span");
-          const booked = isBooked(dateKey, h);
-
+        const card = document.createElement("div"); card.className="day-card";
+        card.innerHTML = `<div class="day-num">${d.getDate()}</div><div class="day-week">${d.toLocaleDateString(undefined,{weekday:'short'})}</div>`;
+        const wrap=document.createElement("div"); wrap.style.marginTop="12px";
+        for(let h=START_HOUR;h<START_HOUR+3;h++){
+          const slot=document.createElement("span");
+          const booked = isBooked(dateKey,h);
           slot.className = "slot " + (booked ? "booked" : "available");
-          slot.textContent = hourLabel(h);
-
-          if (!booked) {
-            slot.onclick = event => {
-              event.stopPropagation();
-              mockPay(dateKey, h);
-            };
+          slot.textContent = booked ? "Booked" : hourLabel(h);
+          if(booked && canCancel(dateKey)){
+            const btn=document.createElement("button"); btn.className="cancel-btn"; btn.textContent="Cancel"; btn.onclick=()=>mockCancel(dateKey,h);
+            slot.appendChild(btn);
+          } else if(!booked){
+            slot.onclick=()=>mockPay(dateKey,h);
           }
-
           wrap.appendChild(slot);
         }
-
         card.appendChild(wrap);
         monthGrid.appendChild(card);
       }
     }
 
-    // WEEK
-    function getWeekStart(d) {
-      const dd = new Date(d);
-      const day = dd.getDay();
-      const monday = new Date(dd);
-      monday.setDate(dd.getDate() - (day === 0 ? 6 : day - 1));
-      return monday;
-    }
+    function getWeekStart(d){ const dd=new Date(d), day=dd.getDay(), monday=new Date(dd); monday.setDate(dd.getDate()-(day===0?6:day-1)); return monday; }
 
-    function renderWeek() {
-      weekHeader.innerHTML = "";
-      weekBody.innerHTML = "";
-
-      const monday = getWeekStart(cursor);
-      const dates = [];
-
-      const corner = document.createElement("div");
-      weekHeader.appendChild(corner);
-
-      for (let i = 0; i < 7; i++) {
-        const dt = new Date(monday);
-        dt.setDate(monday.getDate() + i);
-        dates.push(dt);
-
-        const head = document.createElement("div");
-        head.className = "week-head";
-        head.textContent = dt.toLocaleDateString(undefined, {
-          weekday: "short",
-          month: "short",
-          day: "numeric"
-        });
-        weekHeader.appendChild(head);
-      }
-
+    function renderWeek(){
+      weekHeader.innerHTML=""; weekBody.innerHTML="";
+      const monday = getWeekStart(cursor); const dates=[];
+      const corner=document.createElement("div"); weekHeader.appendChild(corner);
+      for(let i=0;i<7;i++){ const dt=new Date(monday); dt.setDate(monday.getDate()+i); dates.push(dt); const head=document.createElement("div"); head.className="week-head"; head.textContent=dt.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); weekHeader.appendChild(head); }
       labelEl.textContent = `${dates[0].toLocaleDateString()} — ${dates[6].toLocaleDateString()}`;
-
-      for (let h = START_HOUR; h < END_HOUR; h++) {
-        const timeCol = document.createElement("div");
-        timeCol.className = "time-cell";
-        timeCol.innerHTML = `<strong>${hourLabel(h)}</strong>`;
-        weekBody.appendChild(timeCol);
-
-        for (let i = 0; i < 7; i++) {
-          const key = ymd(dates[i]);
-
-          const cell = document.createElement("div");
-          cell.className = "day-col";
-
-          const box = document.createElement("div");
-          const booked = isBooked(key, h);
-
-          if (booked) {
-            box.className = "hour-box hour-booked";
-            box.textContent = "Booked";
-          } else {
-            box.className = "hour-box hour-available";
-            box.textContent = "Available";
-            box.onclick = () => mockPay(key, h);
-          }
-
-          cell.appendChild(box);
-          weekBody.appendChild(cell);
+      for(let h=START_HOUR;h<END_HOUR;h++){
+        const timeCol=document.createElement("div"); timeCol.className="time-cell"; timeCol.innerHTML=`<strong>${hourLabel(h)}</strong>`; weekBody.appendChild(timeCol);
+        for(let i=0;i<7;i++){
+          const key=ymd(dates[i]); const cell=document.createElement("div"); cell.className="day-col"; const box=document.createElement("div");
+          const booked=isBooked(key,h);
+          if(booked){ box.className="hour-box hour-booked"; box.textContent="Booked"; if(canCancel(key)){ const btn=document.createElement("button"); btn.className="cancel-btn"; btn.textContent="Cancel"; btn.onclick=()=>mockCancel(key,h); box.appendChild(btn); } }
+          else{ box.className="hour-box hour-available"; box.textContent="Available"; box.onclick=()=>mockPay(key,h); }
+          cell.appendChild(box); weekBody.appendChild(cell);
         }
       }
     }
 
-    // RENDER
-    function render() {
-      view === "week" ? renderWeek() : renderMonth();
-    }
-
-    // initialize year display
-    document.getElementById('year').textContent = new Date().getFullYear();
-
+    function render(){ view==="week"?renderWeek():renderMonth(); }
+    document.getElementById('year').textContent=new Date().getFullYear();
     render();
   </script>
 </body>
