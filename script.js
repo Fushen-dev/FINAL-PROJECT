@@ -1,8 +1,8 @@
-// script.js — single module for merch, media, calendar (Firebase realtime)
-// Usage: include as <script type="module" src="script.js"></script> on pages
+// script.js — unified module for merch, media, calendar (Firebase Realtime)
+// Include as <script type="module" src="script.js"></script>
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ===========================
@@ -23,22 +23,22 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ===========================
      YEAR IN FOOTERS
      =========================== */
-  document.getElementById('year-home')?.textContent = new Date().getFullYear();
-  document.getElementById('year-photo')?.textContent = new Date().getFullYear();
-  document.getElementById('year-video')?.textContent = new Date().getFullYear();
-  document.getElementById('year-merch')?.textContent = new Date().getFullYear();
-  document.getElementById('year')?.textContent = new Date().getFullYear();
+  ['year-home','year-photo','year-video','year-merch','year'].forEach(id => {
+    document.getElementById(id)?.textContent = new Date().getFullYear();
+  });
 
   /* ===========================
      PRODUCTS (Merch)
-     Edit product objects to change pictures/prices/stripeLink
      =========================== */
   const products = [
     { id: 'shirt001', title: 'Huanger Films Tee', price: 25.00, img: 'assets/merch-shirt.jpg', stripeLink: '' },
     { id: 'print001', title: '8x10 Photo Print', price: 15.00, img: 'assets/8x10-print.jpg', stripeLink: '' }
   ];
 
-  function escapeHtml(str){ if(!str) return ''; return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+  function escapeHtml(str){ 
+    if(!str) return ''; 
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); 
+  }
 
   function renderMerchGrid(){
     const grid = document.getElementById('merch-grid');
@@ -63,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===========================
      MEDIA (Photos & Videos)
-     LocalStorage-based media collection for preview & local add
      =========================== */
   const defaultMedia = { photos: [], videos: [] };
 
@@ -85,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       grid.appendChild(card);
     });
   }
+
   function renderVideos(){
     const grid = document.getElementById('videos-grid');
     if(!grid) return;
@@ -133,32 +133,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===========================
      CALENDAR (Firebase Realtime)
-     - real-time bookings, mock-pay flow (client writes 'true' to bookings/date/hour)
-     - works across all pages that include calendar markup
      =========================== */
   const START_HOUR = 7, END_HOUR = 20;
-  let bookings = {}; // will be replaced by realtime listener
+  let bookings = {}; 
 
-  // realtime listener
   onValue(ref(db, "bookings"), snap => {
     bookings = snap.exists() ? snap.val() : {};
-    // if calendar elements exist — re-render
-    if(document.getElementById('monthGrid') || document.getElementById('weekBody')) {
-      renderCalendar(); // shared renderer
-    }
+    renderCalendar();
   });
 
-  // helper functions
   function pad(n){ return String(n).padStart(2,'0'); }
   function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
   function hourLabel(h){ return `${pad(h)}:00`; }
   function isBooked(date, hour){ return bookings?.[date]?.[hour] === true; }
 
-  // calendar state (shared)
   let view = 'week';
   let cursor = new Date();
 
-  // wire controls (if present)
+  // Control elements
   const monthBtn = document.getElementById('monthBtn');
   const weekBtn = document.getElementById('weekBtn');
   const prevBtn = document.getElementById('prevBtn');
@@ -175,41 +167,54 @@ document.addEventListener('DOMContentLoaded', () => {
   prevBtn?.addEventListener('click', ()=> { if(view==='week') cursor.setDate(cursor.getDate()-7); else cursor.setMonth(cursor.getMonth()-1); renderCalendar(); });
   nextBtn?.addEventListener('click', ()=> { if(view==='week') cursor.setDate(cursor.getDate()+7); else cursor.setMonth(cursor.getMonth()+1); renderCalendar(); });
 
-  // mock payment — writes to firebase
+  function canCancel(dateStr){
+    const today = new Date();
+    const date = new Date(dateStr);
+    const diff = date.setHours(0,0,0,0) - today.setHours(0,0,0,0);
+    return diff >= 24*60*60*1000; // 1 day in advance
+  }
+
   function mockPay(date, hour){
-    const ok = confirm(`Mock payment (no real money)\n\nBook ${date} @ ${hourLabel(hour)}?`);
+    const ok = confirm(`Book ${date} @ ${hourLabel(hour)}? (Mock payment)`);
     if(!ok) return;
     set(ref(db, `bookings/${date}/${hour}`), true);
-    alert('Booking confirmed (mock).');
+    alert('Booking confirmed.');
   }
 
-  // render helper for calendar pages
-  function renderCalendar(){
-    if(view === 'month') renderMonth();
-    else renderWeek();
+  function cancelBooking(date,hour){
+    if(!canCancel(date)){ alert('Cancellations must be made at least 1 day in advance.'); return; }
+    const ok = confirm(`Cancel booking on ${date} @ ${hourLabel(hour)}?`);
+    if(!ok) return;
+    remove(ref(db, `bookings/${date}/${hour}`));
+    alert('Booking canceled.');
   }
 
-  // Month rendering (if monthGrid present)
+  function renderCalendar(){ view==='week'?renderWeek():renderMonth(); }
+
   function renderMonth(){
     if(!monthGrid) return;
     monthGrid.innerHTML = '';
-    labelEl && (labelEl.textContent = cursor.toLocaleString(undefined, { month:'long', year:'numeric' }));
+    labelEl && (labelEl.textContent = cursor.toLocaleString(undefined,{month:'long',year:'numeric'}));
     const y = cursor.getFullYear(), m = cursor.getMonth();
     const first = new Date(y,m,1);
     const startDay = first.getDay();
-    const start = new Date(first); start.setDate(first.getDate() - startDay);
+    const start = new Date(first); start.setDate(first.getDate()-startDay);
     for(let i=0;i<42;i++){
       const d = new Date(start); d.setDate(start.getDate()+i);
       const key = ymd(d);
       const card = document.createElement('div'); card.className='day-card';
       card.innerHTML = `<div class="day-num">${d.getDate()}</div><div class="small-muted">${d.toLocaleDateString(undefined,{weekday:'short'})}</div>`;
       const wrap = document.createElement('div'); wrap.style.marginTop='8px';
-      for(let h = START_HOUR; h < Math.min(END_HOUR, START_HOUR+6); h++){
+      for(let h=START_HOUR; h<Math.min(END_HOUR, START_HOUR+6); h++){
         const s = document.createElement('span');
-        const booked = isBooked(key, h);
-        s.className = 'slot ' + (booked ? 'booked' : 'available');
-        s.textContent = hourLabel(h);
-        if(!booked) s.addEventListener('click', ev=> { ev.stopPropagation(); mockPay(key,h); });
+        const booked = isBooked(key,h);
+        s.className = 'slot ' + (booked?'booked':'available');
+        s.textContent = booked?'Booked':hourLabel(h);
+        if(booked){
+          s.addEventListener('click', ()=> cancelBooking(key,h));
+        } else {
+          s.addEventListener('click', ()=> mockPay(key,h));
+        }
         wrap.appendChild(s);
       }
       card.appendChild(wrap);
@@ -217,48 +222,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Week rendering (if weekHeader/weekBody present)
   function getWeekStart(d){
     const dd = new Date(d);
     const day = dd.getDay();
-    const mon = new Date(dd);
-    mon.setDate(dd.getDate() - (day===0 ? 6 : day-1));
+    const mon = new Date(dd); mon.setDate(dd.getDate()-(day===0?6:day-1));
     return mon;
   }
 
   function renderWeek(){
     if(!weekHeader || !weekBody) return;
-    weekHeader.innerHTML = ''; weekBody.innerHTML = '';
+    weekHeader.innerHTML=''; weekBody.innerHTML='';
     const mon = getWeekStart(cursor);
-    const dates = [];
-    const corner = document.createElement('div'); weekHeader.appendChild(corner);
+    const dates=[];
+    weekHeader.appendChild(document.createElement('div')); // corner
     for(let i=0;i<7;i++){
       const dt = new Date(mon); dt.setDate(mon.getDate()+i); dates.push(dt);
-      const th = document.createElement('div'); th.className='week-head'; th.textContent = dt.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+      const th = document.createElement('div'); th.className='week-head';
+      th.textContent = dt.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
       weekHeader.appendChild(th);
     }
     labelEl && (labelEl.textContent = `${dates[0].toLocaleDateString()} — ${dates[6].toLocaleDateString()}`);
     for(let h=START_HOUR; h<END_HOUR; h++){
-      const timeCell = document.createElement('div'); timeCell.className='time-cell'; timeCell.innerHTML = `<strong>${hourLabel(h)}</strong>`; weekBody.appendChild(timeCell);
+      const timeCell = document.createElement('div'); timeCell.className='time-cell'; timeCell.innerHTML=`<strong>${hourLabel(h)}</strong>`; weekBody.appendChild(timeCell);
       for(let i=0;i<7;i++){
         const key = ymd(dates[i]);
         const cell = document.createElement('div'); cell.className='day-col';
         const box = document.createElement('div');
         const booked = isBooked(key,h);
-        if(booked){ box.className='hour-box hour-booked'; box.textContent='Booked'; }
-        else { box.className='hour-box hour-available'; box.textContent='Available'; box.addEventListener('click', ()=> mockPay(key,h)); }
-        cell.appendChild(box); weekBody.appendChild(cell);
+        if(booked){
+          box.className='hour-box hour-booked';
+          box.textContent='Booked';
+          box.addEventListener('click', ()=> cancelBooking(key,h));
+        } else {
+          box.className='hour-box hour-available';
+          box.textContent='Available';
+          box.addEventListener('click', ()=> mockPay(key,h));
+        }
+        cell.appendChild(box);
+        weekBody.appendChild(cell);
       }
     }
   }
 
-  // always try to render calendar if elements exist
   renderCalendar();
 
-  /* ===========================
-     expose for debugging
-     =========================== */
-  window._huanger = {
-    products, renderMerchGrid, loadLocalMedia, saveLocalMedia, renderPhotos, renderVideos, renderCalendar
-  };
+  // expose for debugging
+  window._huanger = { products, renderMerchGrid, loadLocalMedia, saveLocalMedia, renderPhotos, renderVideos, renderCalendar };
 });
