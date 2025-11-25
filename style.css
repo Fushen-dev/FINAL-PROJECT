@@ -1,311 +1,240 @@
-/* =========================
-   BAUER GLOBAL STYLE THEME
-   ========================= */
+/* ---------------------------------------------------------
+     BAUER PREMIUM GLOBAL THEME — Huanger Films
+----------------------------------------------------------*/
 
-:root{
-  --accent:#00AEEF;      /* Bauer electric blue */
-  --dark:#000;           /* Deep black background */
-  --muted:#888;          /* Soft gray */
-  --bg:#0A0A0A;          /* Almost black */
-  --card:#111;           /* Dark card panels */
-  --border:#1F1F1F;      /* Subtle high-contrast borders */
-  --text:#fff;
+/* ---------- COLOR SYSTEM ---------- */
+:root {
+  --accent: #0af;             /* Electric Bauer Blue */
+  --accent-glow: rgba(0,170,255,0.55);
+  --bg-dark: #0a0a0a;         /* Deep Carbon Black */
+  --bg-card: #111;
+  --bg-hover: #1a1a1a;
+  --text-main: #fff;
+  --text-sub: #ccc;
+  --border-soft: #222;
+  --radius: 14px;
+  --transition: 0.25s ease;
 }
 
-*{
-  box-sizing:border-box;
+/* ---------- GLOBAL RESET ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
 }
 
-body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.5;
+body {
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  line-height: 1.5;
 }
 
-/* =========================
-   HEADER
-   ========================= */
-
-.site-header{
-  background:#000;
-  color:#fff;
-  border-bottom:2px solid var(--accent);
-  padding:6px 0;
+/* ---------- LAYOUT ---------- */
+.container {
+  width: min(1200px, 92%);
+  margin: auto;
+  padding: 20px 0;
 }
 
-.site-header .container{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+/* ---------------------------------------------------------
+     HEADER / NAVIGATION
+---------------------------------------------------------- */
+.site-header {
+  background: #000;
+  padding: 18px 0;
+  border-bottom: 1px solid #111;
+  margin-bottom: 20px;
 }
 
-.brand{
-  font-size:22px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:1px;
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.main-nav a{
-  color:#fff;
-  margin-left:16px;
-  text-decoration:none;
-  font-weight:600;
-  transition:0.2s ease;
+.brand {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
-.main-nav a:hover{
+.main-nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.main-nav a {
+  color: var(--text-sub);
+  font-weight: 700;
+  text-decoration: none;
+  padding: 6px 2px;
+  transition: var(--transition);
+  position: relative;
+}
+.main-nav a:hover { color: var(--accent); }
+.main-nav a::after{
+  content:"";
+  position:absolute;
+  left:0; bottom:-6px;
+  width:0%; height:2px;
+  background:var(--accent);
+  transition: width .2s ease;
+}
+.main-nav a:hover::after{ width:100%; }
+.main-nav a.active{
   color:var(--accent);
 }
 
-/* =========================
-   GLOBAL CONTAINERS
-   ========================= */
-
-.container{
-  max-width:1100px;
-  margin:0 auto;
-  padding:24px;
+/* ---------------------------------------------------------
+     GLOBAL BUTTONS
+---------------------------------------------------------- */
+.btn, button {
+  background: var(--accent);
+  color: #000;
+  padding: 10px 16px;
+  font-size: 0.98rem;
+  font-weight: 800;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-
-/* =========================
-   BUTTONS
-   ========================= */
-
-.btn{
-  display:inline-block;
-  padding:10px 18px;
-  background:var(--accent);
-  color:#000;
-  border-radius:6px;
-  font-weight:600;
-  text-decoration:none;
-  border:0;
-  cursor:pointer;
-  transition:0.2s ease;
+.btn.ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid rgba(255,255,255,0.04);
 }
-
-.btn:hover{
-  opacity:0.85;
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px var(--accent-glow);
 }
+.btn:active { transform: scale(0.98); }
 
-.btn.ghost{
-  background:transparent;
-  color:var(--accent);
-  border:2px solid var(--accent);
-}
-
-.btn.ghost:hover{
-  background:var(--accent);
-  color:#000;
-}
-
-.btn.small{
-  padding:6px 10px;
-  font-size:13px;
-}
-
-/* =========================
-   CARDS + PANELS
-   ========================= */
-
-.about,
-.panel,
-.product,
-.media-grid .card{
-  background:var(--card);
-  padding:16px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  box-shadow:0 0 14px rgba(0,0,0,0.4);
-}
-
-/* =========================
-   GRIDS
-   ========================= */
-
-.media-grid,
-.product-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:16px;
-}
-
-.media-grid img,
-.product img{
-  width:100%;
-  border-radius:6px;
-}
-
-/* =========================
-   FOOTER
-   ========================= */
-
-.site-footer{
-  padding:20px;
-  text-align:center;
-  background:#000;
-  color:#fff;
-  border-top:2px solid var(--accent);
-  margin-top:30px;
-}
-
-/* =========================
-   CALENDAR
-   ========================= */
-
-.calendar-controls{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:16px;
-}
-
-.month{
-  padding:16px;
-  background:var(--card);
-  border-radius:10px;
-  border:1px solid var(--border);
-}
-
-.month-grid{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:6px;
-  margin-top:12px;
-}
-
-.day-cell{
-  padding:14px 8px;
-  text-align:center;
-  border:1px solid var(--border);
-  background:#0F0F0F;
-  border-radius:6px;
-  cursor:pointer;
-  transition:0.2s ease;
-  font-weight:600;
-}
-
-.day-cell:hover{
-  background:#111;
-  border-color:var(--accent);
-}
-
-.day-cell.booked{
-  background:#330000;
-  border-color:#FF3B3B;
-}
-
-/* Hint text */
-.hint{
-  color:var(--muted);
-  margin-left:10px;
-}
-
-/* File input + labels */
-label{
-  display:block;
-  margin:8px 0;
-}
-
-.media-actions{
-  margin:12px 0;
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.panel-actions{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-
-small{
-  color:var(--muted);
-}
-/* -----------------------------
-   MERCH PAGE (Bauer-styled)
------------------------------ */
-
+/* ---------------------------------------------------------
+     PAGE TITLES / TEXT
+---------------------------------------------------------- */
 .page-title {
-  font-size: 2.3rem;
-  margin-bottom: 5px;
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
+.page-subtext { color: var(--text-sub); margin-bottom: 18px; }
 
-.page-subtext {
-  font-size: 1.05rem;
-  opacity: 0.8;
-  margin-bottom: 25px;
-}
-
-/* Product Grid */
-.product-grid {
+/* ---------------------------------------------------------
+     MEDIA GRID (Photos / Videos)
+---------------------------------------------------------- */
+.media-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 30px;
-  margin-top: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
 }
-
-/* Product Card */
-.product-card {
-  background: white;
-  border-radius: 18px;
-  padding: 18px;
-  border: 1px solid #e5e5e5;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.07);
-  transition: transform .2s ease, box-shadow .3s ease;
+.photo-card, .video-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  padding: 12px;
+  border-radius: var(--radius);
+  transition: var(--transition);
   text-align: center;
 }
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+.photo-card:hover, .video-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.45);
 }
+.photo-card img, .video-card video {
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 12px;
+}
+.media-title { color: white; font-weight: 700; font-size: 1.05rem; }
 
+/* ---------------------------------------------------------
+     MERCH GRID
+---------------------------------------------------------- */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+}
+.product-card {
+  background: var(--bg-card);
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-soft);
+  text-align: center;
+  transition: var(--transition);
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
 .product-card img {
   width: 100%;
   height: 240px;
+  border-radius: 12px;
   object-fit: cover;
-  border-radius: 14px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
-/* Product Labels */
-.product-card h3 {
-  font-size: 1.3rem;
-  margin-bottom: 6px;
-}
+/* ---------------------------------------------------------
+     CALENDAR (Week + Month)
+---------------------------------------------------------- */
+.calendar-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.calendar-controls button { border-radius: 10px; padding:8px 12px; }
 
-.product-card .price {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-/* Buttons */
-.pay-btn {
-  width: 100%;
-  padding: 11px;
-  margin-top: 10px;
+.week-head {
+  background: var(--bg-card);
   border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  transition: opacity .2s ease;
-}
-
-.pay-btn:hover {
-  opacity: 0.85;
-}
-
-.paypal-btn {
-  background: #ffc439;
-}
-
-.stripe-btn {
-  background: #635bff;
+  padding: 10px;
   color: white;
+  text-align: center;
+  font-weight: 700;
+  border: 1px solid var(--border-soft);
+}
+.time-cell {
+  background: #000;
+  color: var(--accent);
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 800;
+  border: 1px solid #0af;
+}
+.hour-box {
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 700;
+  transition: 0.2s ease;
+  margin: 6px;
+  cursor: pointer;
+}
+.hour-available { background: var(--accent); color: #000; }
+.hour-available:hover { transform: translateY(-4px); box-shadow: 0 18px 48px var(--accent-glow); }
+.hour-booked { background: #444; color: #fff; cursor: not-allowed; }
+.slot { padding: 5px 8px; border-radius: 999px; font-weight:700; margin-right:6px; cursor:pointer; }
+.slot.available { background: var(--accent); color: black; }
+.slot.available:hover { transform: translateY(-3px); box-shadow: 0 10px 30px var(--accent-glow); }
+.slot.booked { background:#333; color:#ddd; }
+
+/* DAY CARD */
+.day-card { background: var(--bg-card); border: 1px solid var(--border-soft); padding: 14px; border-radius: var(--radius); transition: var(--transition); }
+.day-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+/* responsive */
+@media (max-width: 920px) {
+  .media-grid, .product-grid { gap: 18px; }
+}
+@media (max-width: 640px) {
+  .media-grid, .product-grid { grid-template-columns: repeat(2,1fr); }
+  .main-nav { gap:12px; font-size:0.95rem; }
+  .brand { font-size:1.2rem; }
 }
