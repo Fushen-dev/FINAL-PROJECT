@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     set(ref(db, `bookings/${dateStr}/${hour}`), true)
       .then(()=> {
         // optional: show a confirmation; UI will update when DB emits new state
-        alert('Booking request sent. UI will update when database confirms.');
+        alert('Booking confirmed!');
       })
       .catch(err=>{
         console.error('Firebase write error:', err);
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ok = confirm(`Cancel booking ${dateStr} @ ${hourLabel(hour)}?`);
     if(!ok) return;
     remove(ref(db, `bookings/${dateStr}/${hour}`))
-      .then(()=> alert('Cancellation requested. UI will update shortly.'))
+      .then(()=> alert('Cancellation confirmed!'))
       .catch(err=> { console.error('Cancel error:', err); alert('Cancellation failed — check console.'); });
   }
 
@@ -167,21 +167,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const booked = isBooked(key, h);
         const slot = document.createElement('div');
         slot.className = 'slot ' + (booked ? 'booked' : 'available');
-        slot.textContent = booked ? 'Booked' : hourLabel(h);
-
-        // Cancel is only allowed if canCancel && booked
-        if (booked && canCancel(key)){
-          const btn = document.createElement('button');
-          btn.className = 'cancel-btn';
-          btn.textContent = 'Cancel';
-          btn.onclick = (ev) => { ev.stopPropagation(); cancelSlot(key, h); };
-          slot.appendChild(btn);
-          // keep slot non-clickable except via cancel button — UI reflects Firebase
-        }
-
-        // Available slots allow booking
-        if (!booked){
-          slot.onclick = () => { bookSlot(key, h); };
+        
+        if (booked) {
+          slot.textContent = 'Booked';
+          // Cancel is only allowed if canCancel && booked
+          if (canCancel(key)){
+            const btn = document.createElement('button');
+            btn.className = 'cancel-btn';
+            btn.textContent = 'Cancel';
+            btn.onclick = (ev) => { ev.stopPropagation(); cancelSlot(key, h); };
+            slot.appendChild(btn);
+          }
+        } else {
+          slot.textContent = hourLabel(h);
+          // Available slots allow booking - THIS IS THE KEY FIX
+          slot.addEventListener('click', () => { bookSlot(key, h); });
         }
 
         wrap.appendChild(slot);
@@ -251,9 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = (ev) => { ev.stopPropagation(); cancelSlot(key, h); };
             box.appendChild(btn);
           }
-          // don't make the entire box clickable to book (it's booked)
         } else {
-          box.onclick = () => bookSlot(key, h);
+          // THIS IS THE KEY FIX - use addEventListener instead of onclick
+          box.addEventListener('click', () => { bookSlot(key, h); });
         }
 
         cell.appendChild(box);
