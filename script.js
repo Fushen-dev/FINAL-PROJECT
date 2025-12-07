@@ -169,14 +169,26 @@ document.addEventListener('DOMContentLoaded', () => {
         slot.className = 'slot ' + (booked ? 'booked' : 'available');
         
         if (booked) {
-          slot.textContent = 'Booked';
+          slot.innerHTML = ''; // Clear text content
+          const label = document.createElement('div');
+          label.textContent = 'Booked';
+          label.style.marginBottom = '4px';
+          slot.appendChild(label);
+          
           // Cancel is only allowed if canCancel && booked
           if (canCancel(key)){
             const btn = document.createElement('button');
             btn.className = 'cancel-btn';
-            btn.textContent = 'Cancel';
+            btn.textContent = '✕ Cancel';
             btn.onclick = (ev) => { ev.stopPropagation(); cancelSlot(key, h); };
             slot.appendChild(btn);
+          } else {
+            const note = document.createElement('div');
+            note.textContent = '(Non-refundable)';
+            note.style.fontSize = '10px';
+            note.style.color = '#999';
+            note.style.marginTop = '4px';
+            slot.appendChild(note);
           }
         } else {
           slot.textContent = hourLabel(h);
@@ -243,13 +255,26 @@ document.addEventListener('DOMContentLoaded', () => {
         box.textContent = booked ? 'Booked' : 'Available';
 
         if (booked){
+          box.innerHTML = ''; // Clear content
+          const label = document.createElement('div');
+          label.textContent = 'Booked';
+          label.style.marginBottom = '8px';
+          box.appendChild(label);
+          
           // allow cancellation via button only if cancellation rule permits
           if (canCancel(key)){
             const btn = document.createElement('button');
             btn.className = 'cancel-btn';
-            btn.textContent = 'Cancel';
+            btn.textContent = '✕ Cancel Booking';
+            btn.style.fontSize = '12px';
             btn.onclick = (ev) => { ev.stopPropagation(); cancelSlot(key, h); };
             box.appendChild(btn);
+          } else {
+            const note = document.createElement('div');
+            note.textContent = 'Cannot cancel';
+            note.style.fontSize = '11px';
+            note.style.color = '#999';
+            box.appendChild(note);
           }
         } else {
           // THIS IS THE KEY FIX - use addEventListener instead of onclick
