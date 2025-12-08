@@ -51,8 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
         title: 'Hockey Action Shot',
         url: 'images/hockey-action.jpg'
       }
-      // Add more photos here:
-      // {id: 'photo002', title: 'Another Photo', url: 'images/photo2.jpg'}
     ], 
     videos: [] 
   };
@@ -82,19 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const START_HOUR = 7, END_HOUR = 20;
   let bookings = {};
 
-  // listen for realtime bookings and re-render when they change
   onValue(ref(db, "bookings"), snap => {
     bookings = snap.exists() ? snap.val() : {};
     renderCalendar();
   });
 
-  // helpers
   function pad(n){ return String(n).padStart(2,'0'); }
   function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
   function hourLabel(h){ return `${pad(h)}:00`; }
   function isBooked(date, hour){ return bookings?.[date]?.[hour] === true; }
 
-  // check cancellation rule: must be at least 1 full day before booking date
   function canCancel(dateStr){
     const today = new Date(); today.setHours(0,0,0,0);
     const d = new Date(dateStr); d.setHours(0,0,0,0);
@@ -102,14 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return diffDays >= 1;
   }
 
-  // booking write (Firebase authoritative)
   function bookSlot(dateStr, hour){
     const ok = confirm(`Book ${dateStr} @ ${hourLabel(hour)}? (Mock payment)`);
     if(!ok) return;
-    // write to firebase — on success the realtime onValue will update bookings and UI
     set(ref(db, `bookings/${dateStr}/${hour}`), true)
       .then(()=> {
-        // optional: show a confirmation; UI will update when DB emits new state
         alert('Booking confirmed!');
       })
       .catch(err=>{
@@ -127,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .catch(err=> { console.error('Cancel error:', err); alert('Cancellation failed — check console.'); });
   }
 
-  // state + refs
   let view = 'week';
   let cursor = new Date();
   const monthBtn = document.getElementById('monthBtn');
@@ -148,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderCalendar(){ view==='week' ? renderWeek(): renderMonth(); }
 
-  // MONTH
   function renderMonth(){
     if(!monthGrid) return;
     monthGrid.innerHTML = '';
@@ -173,20 +163,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const wrap = document.createElement('div');
       wrap.style.marginTop = '10px';
 
-      // show a compact subset of hours in month (change to full by replacing END_HOUR)
       for (let h = START_HOUR; h < Math.min(END_HOUR, START_HOUR + 6); h++){
         const booked = isBooked(key, h);
         const slot = document.createElement('div');
         slot.className = 'slot ' + (booked ? 'booked' : 'available');
         
         if (booked) {
-          slot.innerHTML = ''; // Clear text content
+          slot.innerHTML = '';
           const label = document.createElement('div');
           label.textContent = 'Booked';
           label.style.marginBottom = '4px';
           slot.appendChild(label);
           
-          // Cancel is only allowed if canCancel && booked
           if (canCancel(key)){
             const btn = document.createElement('button');
             btn.className = 'cancel-btn';
@@ -203,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } else {
           slot.textContent = hourLabel(h);
-          // Available slots allow booking - THIS IS THE KEY FIX
           slot.addEventListener('click', () => { bookSlot(key, h); });
         }
 
@@ -215,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // WEEK
   function getWeekStart(d){
     const dd = new Date(d);
     const day = dd.getDay();
@@ -232,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const monday = getWeekStart(cursor);
     const dates = [];
 
-    // corner cell
     const corner = document.createElement('div');
     weekHeader.appendChild(corner);
 
@@ -266,13 +251,12 @@ document.addEventListener('DOMContentLoaded', () => {
         box.textContent = booked ? 'Booked' : 'Available';
 
         if (booked){
-          box.innerHTML = ''; // Clear content
+          box.innerHTML = '';
           const label = document.createElement('div');
           label.textContent = 'Booked';
           label.style.marginBottom = '8px';
           box.appendChild(label);
           
-          // allow cancellation via button only if cancellation rule permits
           if (canCancel(key)){
             const btn = document.createElement('button');
             btn.className = 'cancel-btn';
@@ -288,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
             box.appendChild(note);
           }
         } else {
-          // THIS IS THE KEY FIX - use addEventListener instead of onclick
           box.addEventListener('click', () => { bookSlot(key, h); });
         }
 
@@ -298,9 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // initial render
   renderCalendar();
 
-  // expose for debugging
   window._huanger = { products, renderMerchGrid, loadLocalMedia, saveLocalMedia, renderPhotos, renderVideos, renderCalendar };
 });
