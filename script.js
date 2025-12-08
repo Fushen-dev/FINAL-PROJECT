@@ -44,16 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMerchGrid();
 
   /* MEDIA (unchanged) */
-  const defaultMedia = { 
-    photos: [
-      {
-        id: 'hockey001',
-        title: 'I can make you look like this.',
-        url: 'hockey-action.jpg'
-      }
-    ], 
-    videos: [] 
-  };
+  const defaultMedia = { photos: [], videos: [] };
   function loadLocalMedia(){ const raw = localStorage.getItem('huanger_media_v1'); if(!raw){ localStorage.setItem('huanger_media_v1', JSON.stringify(defaultMedia)); return defaultMedia; } try{ return JSON.parse(raw); } catch(e){ localStorage.setItem('huanger_media_v1', JSON.stringify(defaultMedia)); return defaultMedia; } }
   function saveLocalMedia(obj){ localStorage.setItem('huanger_media_v1', JSON.stringify(obj)); }
   function renderPhotos(){ const grid = document.getElementById('photos-grid'); if(!grid) return; const media = loadLocalMedia().photos; grid.innerHTML = ''; media.forEach(m=>{ const card = document.createElement('div'); card.className='photo-card'; card.innerHTML = `<img src="${m.url}" alt="${escapeHtml(m.title)}"><div class="media-title">${escapeHtml(m.title)}</div>`; grid.appendChild(card); }); }
