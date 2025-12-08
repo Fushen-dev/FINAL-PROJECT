@@ -1,101 +1,403 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calendar — Huanger Films</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    :root {
-      --accent: #0077c9;
-      --panel-bg: #0f0f10;
-      --card: #111;
-      --text: #fff;
+// script.js — unified module for merch, media, calendar (Firebase Realtime)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+document.addEventListener('DOMContentLoaded', () => {
+  /* FIREBASE */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDB4SOUmddsEbhs_HHsrRGUBDX5PLU9hiE",
+    authDomain: "huanger-films.firebaseapp.com",
+    databaseURL: "https://huanger-films-default-rtdb.firebaseio.com",
+    projectId: "huanger-films",
+    storageBucket: "huanger-films.firebasestorage.app",
+    messagingSenderId: "790500951380",
+    appId: "1:790500951380:web:c8a93a4b21caef24d174c1"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  /* FOOTER YEARS */
+  ['year-home','year-photo','year-video','year-merch','year'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = new Date().getFullYear();
+  });
+
+  /* MERCH */
+  const products = [
+    { id: 'shirt001', title: 'Huanger Films Tee', price: 25.00, img: 'assets/merch-shirt.jpg', stripeLink: '' },
+    { id: 'print001', title: '8x10 Photo Print', price: 15.00, img: 'assets/8x10-print.jpg', stripeLink: '' }
+  ];
+  
+  function escapeHtml(str){ 
+    if(!str) return ''; 
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); 
+  }
+  
+  function renderMerchGrid(){
+    const grid = document.getElementById('merch-grid'); 
+    if(!grid) return;
+    grid.innerHTML = '';
+    products.forEach(p=>{
+      const card = document.createElement('div'); 
+      card.className='product-card';
+      card.innerHTML = `<img src="${p.img}" alt="${escapeHtml(p.title)}" onerror="this.style.display='none'">
+         <h3 class="product-name">${escapeHtml(p.title)}</h3>
+         <div class="product-price">$${p.price.toFixed(2)}</div>
+         <button class="pay-btn mockpay-btn">Buy (Mock)</button>`;
+      grid.appendChild(card);
+      const btn = card.querySelector('.mockpay-btn');
+      if(btn) btn.addEventListener('click', ()=> alert('Mock purchase: ' + p.title + ' — $' + p.price.toFixed(2)));
+    });
+  }
+  renderMerchGrid();
+
+  /* MEDIA */
+  const defaultMedia = { photos: [], videos: [] };
+  
+  function loadLocalMedia(){ 
+    const raw = localStorage.getItem('huanger_media_v1'); 
+    if(!raw){ 
+      localStorage.setItem('huanger_media_v1', JSON.stringify(defaultMedia)); 
+      return defaultMedia; 
+    } 
+    try{ 
+      return JSON.parse(raw); 
+    } catch(e){ 
+      localStorage.setItem('huanger_media_v1', JSON.stringify(defaultMedia)); 
+      return defaultMedia; 
+    } 
+  }
+  
+  function saveLocalMedia(obj){ 
+    localStorage.setItem('huanger_media_v1', JSON.stringify(obj)); 
+  }
+  
+  function renderPhotos(){ 
+    const grid = document.getElementById('photos-grid'); 
+    if(!grid) return; 
+    const media = loadLocalMedia().photos; 
+    grid.innerHTML = ''; 
+    media.forEach(m=>{ 
+      const card = document.createElement('div'); 
+      card.className='photo-card'; 
+      card.innerHTML = `<img src="${m.url}" alt="${escapeHtml(m.title)}"><div class="media-title">${escapeHtml(m.title)}</div>`; 
+      grid.appendChild(card); 
+    }); 
+  }
+  
+  function renderVideos(){ 
+    const grid = document.getElementById('videos-grid'); 
+    if(!grid) return; 
+    const media = loadLocalMedia().videos; 
+    grid.innerHTML = ''; 
+    media.forEach(m=>{ 
+      const card = document.createElement('div'); 
+      card.className='video-card'; 
+      card.innerHTML = `<video controls src="${m.url}"></video><div class="media-title">${escapeHtml(m.title)}</div>`; 
+      grid.appendChild(card); 
+    }); 
+  }
+  
+  renderPhotos(); 
+  renderVideos();
+
+  const photoBtn = document.getElementById('add-photo-btn');
+  if(photoBtn){
+    photoBtn.addEventListener('click', ()=>{
+      const title = document.getElementById('photo-title')?.value || 'Untitled';
+      const fileEl = document.getElementById('photo-file'); 
+      if(!fileEl || !fileEl.files || !fileEl.files[0]) return alert('Pick an image file (local only).');
+      const file = fileEl.files[0]; 
+      const reader = new FileReader();
+      reader.onload = function(evt){ 
+        const media = loadLocalMedia(); 
+        const id = 'p' + Date.now(); 
+        media.photos.unshift({id, title, url: evt.target.result}); 
+        saveLocalMedia(media); 
+        renderPhotos(); 
+        fileEl.value = ''; 
+        const titleEl = document.getElementById('photo-title');
+        if(titleEl) titleEl.value = ''; 
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const videoBtn = document.getElementById('add-video-btn');
+  if(videoBtn){
+    videoBtn.addEventListener('click', ()=>{
+      const title = document.getElementById('video-title')?.value || 'Untitled';
+      const fileEl = document.getElementById('video-file'); 
+      if(!fileEl || !fileEl.files || !fileEl.files[0]) return alert('Pick a video file (local only).');
+      const file = fileEl.files[0]; 
+      const reader = new FileReader();
+      reader.onload = function(evt){ 
+        const media = loadLocalMedia(); 
+        const id = 'v' + Date.now(); 
+        media.videos.unshift({id, title, url: evt.target.result}); 
+        saveLocalMedia(media); 
+        renderVideos(); 
+        fileEl.value = ''; 
+        const titleEl = document.getElementById('video-title');
+        if(titleEl) titleEl.value = ''; 
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* CALENDAR */
+  const START_HOUR = 7;
+  const END_HOUR = 20;
+  let bookings = {};
+
+  onValue(ref(db, "bookings"), snap => {
+    bookings = snap.exists() ? snap.val() : {};
+    renderCalendar();
+  });
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function hourLabel(h){ return `${pad(h)}:00`; }
+  function isBooked(date, hour){ return bookings && bookings[date] && bookings[date][hour] === true; }
+
+  function canCancel(dateStr){
+    const today = new Date(); 
+    today.setHours(0,0,0,0);
+    const d = new Date(dateStr); 
+    d.setHours(0,0,0,0);
+    const diffDays = (d - today) / (1000*60*60*24);
+    return diffDays >= 1;
+  }
+
+  function bookSlot(dateStr, hour){
+    const ok = confirm(`Book ${dateStr} @ ${hourLabel(hour)}? (Mock payment)`);
+    if(!ok) return;
+    set(ref(db, `bookings/${dateStr}/${hour}`), true)
+      .then(()=> {
+        alert('Booking confirmed!');
+      })
+      .catch(err=>{
+        console.error('Firebase write error:', err);
+        alert('Booking failed — check console for details.');
+      });
+  }
+
+  function cancelSlot(dateStr, hour){
+    if(!canCancel(dateStr)){ 
+      alert('You may only cancel at least 1 day before the booking.'); 
+      return; 
     }
-    body { margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif; background:#0b0b0b; color:var(--text); }
-    .container { width:min(1100px,92%); margin:0 auto; padding:18px 0; }
-    .site-header, .site-footer { background:#0a0a0a; padding:12px 0; }
-    .site-header .container { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-    .brand { color:var(--accent); font-weight:900; letter-spacing:1px; text-transform:uppercase; }
-    .main-nav a { color:#ccc; font-weight:700; text-decoration:none; margin-left:12px; }
-    .main-nav a.active { color:var(--accent); }
-    .hero-compact { height:180px; display:flex; align-items:center; justify-content:space-between; padding:28px; background:linear-gradient(180deg, rgba(0,0,0,0.26), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=60") center/cover no-repeat; border-bottom:3px solid var(--accent); margin-bottom:18px; }
-    .btn { background:var(--accent); color:#000; padding:8px 12px; border-radius:10px; font-weight:800; border:none; cursor:pointer; }
-    .calendar-wrap { display:flex; gap:20px; align-items:flex-start; }
-    .calendar-main { flex:1; background:var(--panel-bg); padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.45); }
-    .controls-wrap { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
-    #monthGrid { display:grid; grid-template-columns:repeat(7,1fr); gap:12px; margin-top:12px; }
-    .day-card { background:var(--card); border-radius:12px; padding:12px; min-height:120px; border:1px solid rgba(255,255,255,0.02); }
-    .day-num { font-weight:800; font-size:16px; }
-    .day-week { color:#9aa6b8; font-size:12px; margin-top:6px; }
-    .slot { display:inline-block; padding:6px 8px; border-radius:8px; margin:6px 6px 0 0; font-weight:700; font-size:13px; cursor:pointer; }
-    .slot.available { background:linear-gradient(90deg,var(--accent), #0077c9); color:#fff; }
-    .slot.booked { background:#2b2b2b; color:#fff; opacity:0.95; cursor:not-allowed; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-    .slot .cancel-btn { margin-top:6px; background:#c93030; color:#fff; padding:4px 6px; border-radius:6px; border:none; cursor:pointer; font-weight:800; }
-    /* week */
-    #weekHeader, #weekBody { display:grid; grid-template-columns:90px repeat(7,1fr); gap:10px; align-items:start; margin-top:10px; }
-    .week-head { background:var(--card); padding:10px; border-radius:10px; text-align:center; font-weight:800; }
-    .time-cell { text-align:center; font-weight:800; color:#bcd4ee; padding:8px; }
-    .hour-box { margin:6px; border-radius:8px; padding:10px; font-weight:800; text-align:center; }
-    .hour-available { background: linear-gradient(90deg,var(--accent), #0077c9); color:white; cursor:pointer; }
-    .hour-booked { background:#2b2b2b; color:#ddd; }
-    @media(max-width:900px){ #monthGrid{ grid-template-columns:repeat(2,1fr); } #weekHeader,#weekBody{ grid-template-columns:70px repeat(7,1fr); } .hero-compact{ height:140px; } }
-  </style>
-</head>
-<body>
-  <header class="site-header">
-    <div class="container">
-      <div class="brand">HUANGER FILMS</div>
-      <nav class="main-nav">
-        <a href="index.html">Home</a>
-        <a class="active" href="calendar.html">Calendar</a>
-        <a href="videos.html">Videos</a>
-        <a href="photos.html">Photos</a>
-        <a href="merch.html">Merch</a>
-      </nav>
-    </div>
-  </header>
+    const ok = confirm(`Cancel booking ${dateStr} @ ${hourLabel(hour)}?`);
+    if(!ok) return;
+    remove(ref(db, `bookings/${dateStr}/${hour}`))
+      .then(()=> alert('Cancellation confirmed!'))
+      .catch(err=> { 
+        console.error('Cancel error:', err); 
+        alert('Cancellation failed — check console.'); 
+      });
+  }
 
-  <section class="hero-compact">
-    <div>
-      <h1>Booking Calendar</h1>
-      <p style="max-width:600px;color:#d3dbe6;">Real-time availability synced across users. Click available slots to reserve (mock), cancel at least one day prior.</p>
-    </div>
-    <div style="text-align:right">
-      <a class="btn" href="index.html">Back to Home</a>
-    </div>
-  </section>
+  let view = 'week';
+  let cursor = new Date();
+  const monthBtn = document.getElementById('monthBtn');
+  const weekBtn = document.getElementById('weekBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const labelEl = document.getElementById('label');
+  const monthGrid = document.getElementById('monthGrid');
+  const weekHeader = document.getElementById('weekHeader');
+  const weekBody = document.getElementById('weekBody');
+  const monthView = document.getElementById('monthView');
+  const weekView = document.getElementById('weekView');
 
-  <main class="container calendar-wrap">
-    <div class="calendar-main">
-      <div class="controls-wrap">
-        <div>
-          <button id="weekBtn" class="btn">Week</button>
-          <button id="monthBtn" class="btn">Month</button>
-        </div>
-        <div>
-          <button id="prevBtn" class="btn">◀ Prev</button>
-          <button id="nextBtn" class="btn">Next ▶</button>
-        </div>
-        <div id="label" style="font-weight:800;"></div>
-      </div>
+  if(monthBtn) monthBtn.addEventListener('click', ()=> { 
+    view='month'; 
+    if(monthView) monthView.style.display='block'; 
+    if(weekView) weekView.style.display='none'; 
+    renderCalendar(); 
+  });
+  
+  if(weekBtn) weekBtn.addEventListener('click', ()=> { 
+    view='week'; 
+    if(monthView) monthView.style.display='none'; 
+    if(weekView) weekView.style.display='block'; 
+    renderCalendar(); 
+  });
+  
+  if(prevBtn) prevBtn.addEventListener('click', ()=> { 
+    if(view==='week') cursor.setDate(cursor.getDate()-7); 
+    else cursor.setMonth(cursor.getMonth()-1); 
+    renderCalendar(); 
+  });
+  
+  if(nextBtn) nextBtn.addEventListener('click', ()=> { 
+    if(view==='week') cursor.setDate(cursor.getDate()+7); 
+    else cursor.setMonth(cursor.getMonth()+1); 
+    renderCalendar(); 
+  });
 
-      <div id="weekView" style="display:block;">
-        <div id="weekHeader"></div>
-        <div id="weekBody"></div>
-      </div>
+  function renderCalendar(){ 
+    if(view==='week') renderWeek(); 
+    else renderMonth(); 
+  }
 
-      <div id="monthView" style="display:none;">
-        <div id="monthGrid"></div>
-      </div>
-    </div>
-  </main>
+  function renderMonth(){
+    if(!monthGrid) return;
+    monthGrid.innerHTML = '';
+    if(labelEl) labelEl.textContent = cursor.toLocaleString(undefined, { month: 'long', year: 'numeric' });
 
-  <footer class="site-footer">
-    <div class="container"><p>&copy; <span id="year"></span> Huanger Films</p></div>
-  </footer>
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth();
+    const first = new Date(y, m, 1);
+    const startDay = first.getDay();
+    const start = new Date(first);
+    start.setDate(first.getDate() - startDay);
 
-  <!-- Make sure this matches the path to the script below -->
-  <script type="module" src="script.js"></script>
-</body>
-</html>
+    for (let i = 0; i < 42; i++){
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const key = ymd(d);
+
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      card.innerHTML = `<div class="day-num">${d.getDate()}</div><div class="day-week">${d.toLocaleDateString(undefined, { weekday: 'short' })}</div>`;
+
+      const wrap = document.createElement('div');
+      wrap.style.marginTop = '10px';
+
+      for (let h = START_HOUR; h < Math.min(END_HOUR, START_HOUR + 6); h++){
+        const booked = isBooked(key, h);
+        const slot = document.createElement('div');
+        slot.className = 'slot ' + (booked ? 'booked' : 'available');
+        
+        if (booked) {
+          slot.innerHTML = '';
+          const label = document.createElement('div');
+          label.textContent = 'Booked';
+          label.style.marginBottom = '4px';
+          slot.appendChild(label);
+          
+          if (canCancel(key)){
+            const btn = document.createElement('button');
+            btn.className = 'cancel-btn';
+            btn.textContent = '✕ Cancel';
+            btn.addEventListener('click', (ev) => { 
+              ev.stopPropagation(); 
+              cancelSlot(key, h); 
+            });
+            slot.appendChild(btn);
+          } else {
+            const note = document.createElement('div');
+            note.textContent = '(Non-refundable)';
+            note.style.fontSize = '10px';
+            note.style.color = '#999';
+            note.style.marginTop = '4px';
+            slot.appendChild(note);
+          }
+        } else {
+          slot.textContent = hourLabel(h);
+          slot.addEventListener('click', () => { bookSlot(key, h); });
+        }
+
+        wrap.appendChild(slot);
+      }
+
+      card.appendChild(wrap);
+      monthGrid.appendChild(card);
+    }
+  }
+
+  function getWeekStart(d){
+    const dd = new Date(d);
+    const day = dd.getDay();
+    const monday = new Date(dd);
+    monday.setDate(dd.getDate() - (day === 0 ? 6 : day - 1));
+    return monday;
+  }
+
+  function renderWeek(){
+    if(!weekHeader || !weekBody) return;
+    weekHeader.innerHTML = '';
+    weekBody.innerHTML = '';
+
+    const monday = getWeekStart(cursor);
+    const dates = [];
+
+    const corner = document.createElement('div');
+    weekHeader.appendChild(corner);
+
+    for (let i = 0; i < 7; i++){
+      const dt = new Date(monday);
+      dt.setDate(monday.getDate() + i);
+      dates.push(dt);
+
+      const head = document.createElement('div');
+      head.className = 'week-head';
+      head.textContent = dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      weekHeader.appendChild(head);
+    }
+
+    if(labelEl) labelEl.textContent = `${dates[0].toLocaleDateString()} — ${dates[6].toLocaleDateString()}`;
+
+    for (let h = START_HOUR; h < END_HOUR; h++){
+      const timeCol = document.createElement('div');
+      timeCol.className = 'time-cell';
+      timeCol.innerHTML = `<strong>${hourLabel(h)}</strong>`;
+      weekBody.appendChild(timeCol);
+
+      for (let i = 0; i < 7; i++){
+        const key = ymd(dates[i]);
+        const cell = document.createElement('div');
+        cell.className = 'day-col';
+
+        const booked = isBooked(key, h);
+        const box = document.createElement('div');
+        box.className = booked ? 'hour-box hour-booked' : 'hour-box hour-available';
+
+        if (booked){
+          box.innerHTML = '';
+          const label = document.createElement('div');
+          label.textContent = 'Booked';
+          label.style.marginBottom = '8px';
+          box.appendChild(label);
+          
+          if (canCancel(key)){
+            const btn = document.createElement('button');
+            btn.className = 'cancel-btn';
+            btn.textContent = '✕ Cancel Booking';
+            btn.style.fontSize = '12px';
+            btn.addEventListener('click', (ev) => { 
+              ev.stopPropagation(); 
+              cancelSlot(key, h); 
+            });
+            box.appendChild(btn);
+          } else {
+            const note = document.createElement('div');
+            note.textContent = 'Cannot cancel';
+            note.style.fontSize = '11px';
+            note.style.color = '#999';
+            box.appendChild(note);
+          }
+        } else {
+          box.textContent = 'Available';
+          box.addEventListener('click', () => { bookSlot(key, h); });
+        }
+
+        cell.appendChild(box);
+        weekBody.appendChild(cell);
+      }
+    }
+  }
+
+  renderCalendar();
+
+  window._huanger = { 
+    products, 
+    renderMerchGrid, 
+    loadLocalMedia, 
+    saveLocalMedia, 
+    renderPhotos, 
+    renderVideos, 
+    renderCalendar 
+  };
+});
