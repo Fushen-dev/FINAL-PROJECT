@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     photos: [
       {
         id: 'hockey001',
-        title: 'Hockey Action Shot',
+        title: 'I can make you look like this.',
         url: 'hockey-action.jpg'
       }
     ], 
