@@ -21,6 +21,7 @@
     .main-nav a.active { color:var(--accent); }
     .hero-compact { height:180px; display:flex; align-items:center; justify-content:space-between; padding:28px; background:linear-gradient(180deg, rgba(0,0,0,0.26), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=60") center/cover no-repeat; border-bottom:3px solid var(--accent); margin-bottom:18px; }
     .btn { background:var(--accent); color:#000; padding:8px 12px; border-radius:10px; font-weight:800; border:none; cursor:pointer; }
+    .admin-btn { background:#c93030; color:#fff; margin-left:8px; }
     .calendar-wrap { display:flex; gap:20px; align-items:flex-start; }
     .calendar-main { flex:1; background:var(--panel-bg); padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.45); }
     .controls-wrap { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
@@ -62,6 +63,7 @@
       <p style="max-width:600px;color:#d3dbe6;">Real-time availability synced across users. Click available slots to reserve (mock), cancel at least one day prior.</p>
     </div>
     <div style="text-align:right">
+      <button id="adminBtn" class="btn admin-btn">🔒 Admin</button>
       <a class="btn" href="index.html">Back to Home</a>
     </div>
   </section>
