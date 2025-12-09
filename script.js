@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // CALENDAR
   const START_HOUR = 7;
   const END_HOUR = 20;
-  const BOOKING_PRICE = 150.00; // Price for video session booking
+  const BOOKING_PRICE = 50.00; // Price for video&photo session booking
   let bookings = {};
   let isAdmin = false;
   let pendingBooking = null; // Store booking details before checkout
