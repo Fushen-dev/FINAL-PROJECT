@@ -284,6 +284,19 @@ class CheckoutSystem {
     button.textContent = 'Processing Payment...';
 
     setTimeout(() => {
+      // Check if any items are bookings and confirm them in Firebase
+      const bookingItems = this.cart.filter(item => item.type === 'booking' && item.bookingData);
+      
+      if (bookingItems.length > 0 && typeof window.confirmBookingFromCheckout === 'function') {
+        bookingItems.forEach(item => {
+          window.confirmBookingFromCheckout(item.bookingData, {
+            fullName: this.formData.fullName,
+            email: this.formData.email,
+            address: this.formData.address + ', ' + this.formData.city + ', ' + this.formData.zip
+          });
+        });
+      }
+      
       this.closeCheckout();
       this.showNotification(`✅ Order confirmed! Thank you ${this.formData.fullName}!`, 'success');
       
