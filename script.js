@@ -1,4 +1,4 @@
-// script.js — Calendar with admin mode
+// script.js — Calendar with checkout integration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
@@ -23,8 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // CALENDAR
   const START_HOUR = 7;
   const END_HOUR = 20;
+  const BOOKING_PRICE = 150.00; // Price for video session booking
   let bookings = {};
   let isAdmin = false;
+  let pendingBooking = null; // Store booking details before checkout
 
   // Admin login button
   const adminBtn = document.getElementById('adminBtn');
@@ -67,16 +69,55 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function bookSlot(dateStr, hour){
-    const name = prompt('Enter your full name:');
-    if(!name || name.trim() === '') return;
+    // Store booking details
+    pendingBooking = { 
+      date: dateStr, 
+      hour: hour,
+      dateTime: `${dateStr} @ ${hourLabel(hour)}`
+    };
     
-    const address = prompt('Enter the event location/address:');
-    if(!address || address.trim() === '') return;
+    // Add to cart with checkout system
+    if(typeof checkout !== 'undefined'){
+      checkout.addToCart({
+        id: 'booking-' + Date.now(),
+        name: 'Video Session: ' + pendingBooking.dateTime,
+        price: BOOKING_PRICE,
+        type: 'booking',
+        bookingData: pendingBooking
+      });
+    } else {
+      // Fallback if checkout system not loaded
+      const name = prompt('Enter your full name:');
+      if(!name || name.trim() === '') return;
+      
+      const address = prompt('Enter the event location/address:');
+      if(!address || address.trim() === '') return;
+      
+      confirmBooking(dateStr, hour, name, address);
+    }
+  }
+
+  // Expose function for checkout system to call after payment
+  window.confirmBookingFromCheckout = function(bookingData, customerInfo) {
+    const { date, hour } = bookingData;
+    const { fullName, email, address } = customerInfo;
     
-    const confirmMsg = 'Confirm booking?\n\nDate: ' + dateStr + ' @ ' + hourLabel(hour) + '\nName: ' + name + '\nLocation: ' + address;
-    const ok = confirm(confirmMsg);
-    if(!ok) return;
-    
+    set(ref(db, 'bookings/' + date + '/' + hour), {
+      booked: true,
+      name: fullName,
+      email: email,
+      address: address,
+      timestamp: Date.now()
+    })
+      .then(()=> {
+        console.log('Booking confirmed in Firebase');
+      })
+      .catch(err=> {
+        console.error('Firebase booking error:', err);
+      });
+  };
+
+  function confirmBooking(dateStr, hour, name, address){
     set(ref(db, 'bookings/' + dateStr + '/' + hour), {
       booked: true,
       name: name.trim(),
