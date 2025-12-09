@@ -16,18 +16,19 @@
     .site-header, .site-footer { background:#0a0a0a; padding:12px 0; }
     .site-header .container { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
     .brand { color:var(--accent); font-weight:900; letter-spacing:1px; text-transform:uppercase; }
-    .main-nav a { color:#ccc; font-weight:700; text-decoration:none; margin-left:12px; }
+    .main-nav { display:flex; align-items:center; gap:12px; }
+    .main-nav a { color:#ccc; font-weight:700; text-decoration:none; }
     .main-nav a.active { color:var(--accent); }
+    .cart-btn { position: relative; background:var(--accent); color:#000; padding:8px 16px; border-radius:8px; font-weight:800; border:none; cursor:pointer; }
     .page-title { font-size:32px; font-weight:900; margin-bottom:8px; }
     .page-subtext { color:#9aa6b8; margin-bottom:24px; }
     
-    /* Product Grid */
     .products-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:24px; margin-top:24px; }
     .product-card { background:var(--card); border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.05); transition:transform 0.3s, box-shadow 0.3s; }
     .product-card:hover { transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,119,201,0.3); }
     .product-image { width:100%; height:280px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
     .product-image img { width:100%; height:100%; object-fit:cover; }
-    .product-image.placeholder { color:#555; font-size:48px; }
+    .product-image.placeholder { color:#555; font-size:80px; }
     .product-info { padding:20px; }
     .product-id { font-size:11px; color:#666; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
     .product-name { font-size:22px; font-weight:800; margin-bottom:8px; }
@@ -35,29 +36,8 @@
     .buy-btn { width:100%; background:var(--accent); color:#000; padding:14px; border-radius:10px; font-weight:800; border:none; cursor:pointer; font-size:16px; transition:opacity 0.3s; }
     .buy-btn:hover { opacity:0.85; }
     
-    /* Checkout Modal */
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; }
-    .modal.active { display:flex; }
-    .modal-content { background:var(--panel-bg); border-radius:16px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; padding:32px; position:relative; }
-    .close-btn { position:absolute; top:16px; right:16px; background:none; border:none; color:#999; font-size:28px; cursor:pointer; line-height:1; }
-    .close-btn:hover { color:#fff; }
-    .checkout-title { font-size:24px; font-weight:900; margin-bottom:24px; }
-    .order-summary { background:var(--card); padding:20px; border-radius:12px; margin-bottom:24px; }
-    .order-item { display:flex; justify-content:space-between; margin-bottom:12px; }
-    .order-total { font-size:20px; font-weight:900; color:var(--accent); padding-top:12px; border-top:2px solid #333; margin-top:12px; }
-    
-    .form-group { margin-bottom:20px; }
-    .form-group label { display:block; margin-bottom:8px; font-weight:700; font-size:14px; }
-    .form-group input, .form-group select { width:100%; padding:12px; border-radius:8px; background:#0b0b0b; border:1px solid #333; color:#fff; font-size:14px; }
-    .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--accent); }
-    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    
-    .submit-btn { width:100%; background:var(--accent); color:#000; padding:16px; border-radius:10px; font-weight:800; border:none; cursor:pointer; font-size:18px; margin-top:8px; }
-    .submit-btn:hover { opacity:0.85; }
-    
     @media(max-width:768px){ 
       .products-grid{ grid-template-columns:1fr; } 
-      .form-row{ grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -71,6 +51,10 @@
         <a href="videos.html">Videos</a>
         <a href="photos.html">Photos</a>
         <a class="active" href="merch.html">Merch</a>
+        <button class="cart-btn" onclick="checkout.openCheckout()">
+          🛒 Cart
+          <span id="cart-count" style="display:none;">0</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -89,7 +73,9 @@
           <div class="product-id">ID: HOODIE-001</div>
           <h3 class="product-name">Huanger Films Hoodie</h3>
           <div class="product-price">$45.00</div>
-          <button class="buy-btn" onclick="openCheckout('hoodie', 'Huanger Films Hoodie', 45.00, 'HOODIE-001')">Add to Cart</button>
+          <button class="buy-btn" onclick="checkout.addToCart({id: 'hoodie', name: 'Huanger Films Hoodie', price: 45.00, type: 'merch'})">
+            Add to Cart
+          </button>
         </div>
       </div>
       
@@ -102,81 +88,13 @@
           <div class="product-id">ID: KEYCHAIN-001</div>
           <h3 class="product-name">Huanger Films Keychain</h3>
           <div class="product-price">$12.00</div>
-          <button class="buy-btn" onclick="openCheckout('keychain', 'Huanger Films Keychain', 12.00, 'KEYCHAIN-001')">Add to Cart</button>
+          <button class="buy-btn" onclick="checkout.addToCart({id: 'keychain', name: 'Huanger Films Keychain', price: 12.00, type: 'merch'})">
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>
   </main>
-  
-  <!-- Checkout Modal -->
-  <div class="modal" id="checkoutModal">
-    <div class="modal-content">
-      <button class="close-btn" onclick="closeCheckout()">&times;</button>
-      <h2 class="checkout-title">Checkout</h2>
-      
-      <div class="order-summary">
-        <h3 style="margin-bottom:16px;">Order Summary</h3>
-        <div class="order-item">
-          <span id="order-product-name">Product</span>
-          <span id="order-product-price">$0.00</span>
-        </div>
-        <div class="order-item">
-          <span>Product ID:</span>
-          <span id="order-product-id">-</span>
-        </div>
-        <div class="order-item order-total">
-          <span>Total:</span>
-          <span id="order-total">$0.00</span>
-        </div>
-      </div>
-      
-      <form id="checkoutForm" onsubmit="processCheckout(event)">
-        <div class="form-group">
-          <label>Full Name *</label>
-          <input type="text" id="fullName" required placeholder="John Doe">
-        </div>
-        
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" id="email" required placeholder="john@example.com">
-        </div>
-        
-        <div class="form-group">
-          <label>Address *</label>
-          <input type="text" id="address" required placeholder="123 Main St">
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label>City *</label>
-            <input type="text" id="city" required placeholder="Boston">
-          </div>
-          <div class="form-group">
-            <label>ZIP Code *</label>
-            <input type="text" id="zip" required placeholder="02101">
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label>Card Number *</label>
-          <input type="text" id="cardNumber" required placeholder="1234 5678 9012 3456" maxlength="19">
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label>Expiry Date *</label>
-            <input type="text" id="expiry" required placeholder="MM/YY" maxlength="5">
-          </div>
-          <div class="form-group">
-            <label>CVV *</label>
-            <input type="text" id="cvv" required placeholder="123" maxlength="3">
-          </div>
-        </div>
-        
-        <button type="submit" class="submit-btn">Complete Purchase</button>
-      </form>
-    </div>
-  </div>
   
   <footer class="site-footer">
     <div class="container">
@@ -186,59 +104,7 @@
   
   <script>
     document.getElementById('year-merch').textContent = new Date().getFullYear();
-    
-    let currentProduct = {};
-    
-    function openCheckout(id, name, price, productId) {
-      currentProduct = { id, name, price, productId };
-      document.getElementById('order-product-name').textContent = name;
-      document.getElementById('order-product-price').textContent = '$' + price.toFixed(2);
-      document.getElementById('order-product-id').textContent = productId;
-      document.getElementById('order-total').textContent = '$' + price.toFixed(2);
-      document.getElementById('checkoutModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    
-    function closeCheckout() {
-      document.getElementById('checkoutModal').classList.remove('active');
-      document.body.style.overflow = 'auto';
-      document.getElementById('checkoutForm').reset();
-    }
-    
-    function processCheckout(event) {
-      event.preventDefault();
-      
-      const name = document.getElementById('fullName').value;
-      const email = document.getElementById('email').value;
-      
-      // Mock payment processing
-      alert(`🎉 Order Confirmed!\n\nThank you, ${name}!\n\nProduct: ${currentProduct.name}\nID: ${currentProduct.productId}\nTotal: $${currentProduct.price.toFixed(2)}\n\nA confirmation email will be sent to ${email}\n\n(This is a mock checkout - no actual payment was processed)`);
-      
-      closeCheckout();
-    }
-    
-    // Format card number with spaces
-    document.getElementById('cardNumber').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\s/g, '');
-      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-      e.target.value = formattedValue;
-    });
-    
-    // Format expiry date
-    document.getElementById('expiry').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.slice(0, 2) + '/' + value.slice(2, 4);
-      }
-      e.target.value = value;
-    });
-    
-    // Close modal when clicking outside
-    document.getElementById('checkoutModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeCheckout();
-      }
-    });
   </script>
+  <script src="checkout.js"></script>
 </body>
 </html>
