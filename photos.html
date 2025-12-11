@@ -56,34 +56,29 @@
       <input id="photo-file" type="file" accept="image/*" />
       <button id="add-photo-btn" class="btn">Add Photo</button>
     </section>
-
-    <!-- Live Gallery Section ADDED HERE -->
+    
+    <!-- Live Gallery Section -->
     <section class="panel">
       <h3 style="margin-bottom:12px;">Live Gallery</h3>
       <p style="color:#9aa6b8; margin-bottom:18px;">
         These images are stored in your GitHub repository and appear on the live site.
       </p>
-
       <div class="media-grid">
-
         <div class="photo-card">
-          <img src="images/hockey-game-1.jpg" alt="Hockey Game 1">
+          <img src="hockey-game-1.jpg" alt="Hockey Game 1">
           <div class="media-title">Hockey Game 1</div>
         </div>
-
         <div class="photo-card">
-          <img src="images/hockey-game-2.jpg" alt="Hockey Game 2">
+          <img src="hockey-game-2.jpg" alt="Hockey Game 2">
           <div class="media-title">Hockey Game 2</div>
         </div>
-
         <div class="photo-card">
-          <img src="images/keychain.jpg" alt="Keychain">
+          <img src="keychain.jpg" alt="Keychain">
           <div class="media-title">Keychain</div>
         </div>
-
       </div>
     </section>
-
+    
     <!-- Original JS Grid (local only) -->
     <section id="photos-grid" class="media-grid"></section>
   </main>
@@ -97,3 +92,27 @@
   <script src="photos.js"></script>
 </body>
 </html>
+```
+
+## Now do this:
+
+### Upload the 3 images directly to your main project folder (not in an images folder):
+
+1. Go to your GitHub repo root: `https://github.com/Fushen-dev/FINAL-PROJECT`
+2. Click **"Add file"** → **"Upload files"**
+3. Upload these 3 images directly:
+   - `hockey-game-1.jpg`
+   - `hockey-game-2.jpg`
+   - `keychain.jpg`
+4. Commit
+
+### Your file structure:
+```
+FINAL-PROJECT/
+├── calendar.html
+├── photos.html
+├── script.js
+├── photos.js
+├── hockey-game-1.jpg  ← In main folder
+├── hockey-game-2.jpg  ← In main folder
+├── keychain.jpg       ← In main folder
