@@ -4,7 +4,32 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Videos — Huanger Films</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --accent: #0077c9;
+      --panel-bg: #0f0f10;
+      --card: #111;
+      --text: #fff;
+    }
+    body { margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif; background:#0b0b0b; color:var(--text); }
+    .container { width:min(1100px,92%); margin:0 auto; padding:18px 0; }
+    .site-header, .site-footer { background:#0a0a0a; padding:12px 0; }
+    .site-header .container { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .brand { color:var(--accent); font-weight:900; letter-spacing:1px; text-transform:uppercase; }
+    .main-nav a { color:#ccc; font-weight:700; text-decoration:none; margin-left:12px; }
+    .main-nav a.active { color:var(--accent); }
+    .page-title { font-size:32px; font-weight:900; margin-bottom:8px; }
+    .page-subtext { color:#9aa6b8; margin-bottom:24px; }
+    .panel { background:var(--panel-bg); padding:18px; border-radius:12px; margin-bottom:24px; }
+    .btn { background:var(--accent); color:#000; padding:10px 16px; border-radius:10px; font-weight:800; border:none; cursor:pointer; }
+    .btn:hover { opacity:0.9; }
+    input[type="text"], input[type="file"] { width:100%; padding:10px; border-radius:10px; background:#0b0b0b; border:1px solid #222; color:#fff; margin-bottom:10px; box-sizing:border-box; }
+    .media-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(350px, 1fr)); gap:20px; }
+    .video-card { background:var(--card); border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.05); transition:transform 0.3s; }
+    .video-card:hover { transform:translateY(-4px); }
+    .video-card video { width:100%; height:250px; object-fit:cover; display:block; background:#000; }
+    .media-title { padding:12px; font-weight:700; }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -19,27 +44,50 @@
       </nav>
     </div>
   </header>
-
+  
   <main class="container">
     <h2 class="page-title">Videos</h2>
-    <p class="page-subtext">Add videos for preview (local only) or place MP4s in <code>/assets</code>.</p>
-
-    <section class="media-actions panel" style="padding:18px;">
-      <h3 style="margin-bottom:8px;">Add a video (local only)</h3>
-      <input id="video-title" placeholder="Title" style="width:100%; padding:10px; border-radius:10px; background:#0b0b0b; border:1px solid #222; color:#fff;">
-      <input id="video-file" type="file" accept="video/*" style="margin-top:10px;">
-      <button id="add-video-btn" class="btn" style="margin-top:10px;">Add video</button>
+    <p class="page-subtext">Watch our video content and upload your own.</p>
+    
+    <!-- Upload Panel -->
+    <section class="panel">
+      <h3 style="margin-bottom:12px;">Add a Video</h3>
+      <input id="video-title" type="text" placeholder="Video title (e.g., 'Game Highlights')" />
+      <input id="video-file" type="file" accept="video/*" />
+      <button id="add-video-btn" class="btn">Add Video</button>
     </section>
-
-    <section id="videos-grid" class="media-grid" style="margin-top:18px;"></section>
+    
+    <!-- Live Video Gallery Section -->
+    <section class="panel">
+      <h3 style="margin-bottom:12px;">Live Video Gallery</h3>
+      <p style="color:#9aa6b8; margin-bottom:18px;">
+        These videos are stored in your GitHub repository and appear on the live site.
+      </p>
+      <div class="media-grid">
+        <!-- Add your videos here when you have them -->
+        <div class="video-card">
+          <video controls>
+            <source src="sample-video-1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          <div class="media-title">Sample Video 1</div>
+        </div>
+        <!-- Add more video cards here as needed -->
+      </div>
+    </section>
+    
+    <!-- Original JS Grid (local only) -->
+    <section id="videos-grid" class="media-grid"></section>
   </main>
-
+  
   <footer class="site-footer">
     <div class="container">
       <p>&copy; <span id="year-video"></span> Huanger Films</p>
     </div>
   </footer>
-
-  <script type="module" src="script.js"></script>
+  
+  <script src="photos.js"></script>
 </body>
 </html>
+```
+
