@@ -138,7 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // CALENDAR
   const START_HOUR = 7;
   const END_HOUR = 20;
-  const BOOKING_PRICE = 150.00;
+
+  // PRICE UPDATED TO $50
+  const BOOKING_PRICE = 50.00;
+
   let bookings = {};
   let isAdmin = false;
   let pendingBooking = null;
