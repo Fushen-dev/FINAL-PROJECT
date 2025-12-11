@@ -26,17 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         id: 'hockey1',
         title: 'Hockey Game Action - Player 13',
-        url: 'images/hockey-game-1.jpg'
+        url: 'hockey-game-1.JPG'
       },
       {
         id: 'keychain',
         title: 'Cross Keychain',
-        url: 'images/keychain.jpg'
+        url: 'keychain.JPG'
       },
       {
         id: 'hockey2',
         title: 'Hockey Game Defense',
-        url: 'images/hockey-game-2.jpg'
+        url: 'hockey-game-2.JPG'
       }
     ], 
     videos: [] 
